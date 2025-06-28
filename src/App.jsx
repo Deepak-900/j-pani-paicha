@@ -1,14 +1,11 @@
 
 import './App.css';
-import logo from './assets/logo.png'
+import Router from './routes/Router';
 function App() {
-
   return (
     <>
-      <h1 className="text-3xl   font-bold underline">
-        Hello world!
-        <img src={logo} className='w-[75px]' alt="" />
-      </h1>
+      {/* It's a Router from './routes/Router' */}
+      <Router />
     </>
   )
 }
