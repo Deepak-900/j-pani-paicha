@@ -47,17 +47,17 @@ const Header = () => {
 
                         {/* Social Media Icons - Hide on small mobile, show on larger screens */}
                         <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-0 md:mr-4 hidden sm:flex">
-                            <a href="#" className="btn btn-ghost btn-circle btn-sm p-1 md:p-2">
-                                <FaFacebook className="text-black text-base md:text-lg hover:text-blue-600 transition-colors" />
+                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2  hover:text-blue-600 transition-colors">
+                                <FaFacebook className="text-xl md:text-2xl" />
                             </a>
-                            <a href="#" className="btn btn-ghost btn-circle btn-sm p-1 md:p-2">
-                                <FaTwitter className="text-black text-base md:text-lg hover:text-blue-400 transition-colors" />
+                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-blue-400 transition-colors">
+                                <FaTwitter className="text-xl md:text-2xl " />
                             </a>
-                            <a href="#" className="btn btn-ghost btn-circle btn-sm p-1 md:p-2">
-                                <FaInstagram className="text-black text-base md:text-lg hover:text-pink-600 transition-colors" />
+                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-pink-600 transition-colors">
+                                <FaInstagram className="text-xl md:text-2xl " />
                             </a>
-                            <a href="#" className="btn btn-ghost btn-circle btn-sm p-1 md:p-2">
-                                <FaYoutube className="text-black text-base md:text-lg hover:text-red-600 transition-colors" />
+                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-red-600 transition-colors">
+                                <FaYoutube className="text-xl md:text-2xl " />
                             </a>
                         </div>
                     </div>
@@ -74,15 +74,20 @@ const Header = () => {
                                 <ul
                                     tabIndex={0}
                                     className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                                    <li><a>Item 1</a></li>
+                                    <li><a>Home</a></li>
+                                    <li><a>About Us</a></li>
+                                    <li><a>Shop</a></li>
+                                    <li><a>Contact Us</a></li>
+                                    <li><a>FAQ</a></li>
                                     <li>
-                                        <a>Parent</a>
-                                        <ul className="p-2">
-                                            <li><a>Submenu 1</a></li>
-                                            <li><a>Submenu 2</a></li>
-                                        </ul>
+                                        <details>
+                                            <summary >Parent</summary>
+                                            <ul className="p-2">
+                                                <li><a>Submenu 1</a></li>
+                                                <li><a>Submenu 2</a></li>
+                                            </ul>
+                                        </details>
                                     </li>
-                                    <li><a>Item 3</a></li>
                                 </ul>
                             </div>
                         </div>
