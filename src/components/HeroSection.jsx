@@ -52,7 +52,7 @@ const HeroSection = () => {
     };
 
     return (
-        <div className="w-full max-w-full mx-auto px-12 py-8 relative">
+        <div className="w-full max-w-full mx-auto px-3 sm:px-12 py-8 relative">
 
             {/* Carousel Container */}
             <div className="relative carousel w-full rounded-xl h-64 md:h-96  overflow-hidden">
@@ -78,7 +78,7 @@ const HeroSection = () => {
             </div>
 
             {/* Navigation Arrows - Always Visible */}
-            <div className="absolute top-1/2 left-12 right-12 flex justify-between transform -translate-y-1/2">
+            <div className="absolute top-1/2 left-3 sm:left-12 right-3 sm:right-12 flex justify-between transform -translate-y-1/2">
                 <button
                     onClick={prevSlide}
                     className="btn btn-circle bg-white/30 hover:bg-white/50 text-black border-none shadow-lg rounded-l-none"

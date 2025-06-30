@@ -8,11 +8,11 @@ const Header = () => {
         <>
             <div className="header">
                 {/* Top Header */}
-                <div className='top-header px-4 lg:px-12'> {/* Reduced padding on mobile */}
+                <div className='top-header px-0 sm:px-4 lg:px-12'> {/* Zero padding on mobile */}
                     <div className="navbar bg-base-100">
                         <div className="navbar-start flex items-center">
                             {/* Logo - Always visible */}
-                            <Link to={'/'} className="w-[60px] md:w-[75px] h-[60px] md:h-[75px] min-h-[60px] md:min-h-[75px] flex-shrink-0">
+                            <Link to={'/'} className="w-[60px] md:w-[75px] h-[60px] md:h-[75px] min-h-[60px] md:min-h-[75px] flex-shrink-0 ml-2 sm:ml-0">
                                 <img src={Logo} alt="Company Logo" className="w-full h-full object-contain" />
                             </Link>
 
@@ -46,30 +46,32 @@ const Header = () => {
                         </div>
 
                         {/* Social Media Icons - Hide on small mobile, show on larger screens */}
-                        <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-0 md:mr-4 hidden sm:flex">
-                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2  hover:text-blue-600 transition-colors">
+                        <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-2 sm:mr-4 hidden sm:flex">
+                            <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-blue-600 transition-colors">
                                 <FaFacebook className="text-xl md:text-2xl" />
                             </a>
                             <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-blue-400 transition-colors">
-                                <FaTwitter className="text-xl md:text-2xl " />
+                                <FaTwitter className="text-xl md:text-2xl" />
                             </a>
                             <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-pink-600 transition-colors">
-                                <FaInstagram className="text-xl md:text-2xl " />
+                                <FaInstagram className="text-xl md:text-2xl" />
                             </a>
                             <a href="#" className="btn btn-ghost btn-circle p-1 md:p-2 hover:text-red-600 transition-colors">
-                                <FaYoutube className="text-xl md:text-2xl " />
+                                <FaYoutube className="text-xl md:text-2xl" />
                             </a>
                         </div>
                     </div>
                 </div>
 
                 {/* Button Navbar */}
-                <div className='bottom-header shadow-sm px-4 lg:px-12 '>
-                    <div className="navbar bg-base-100 ">
+                <div className='bottom-header shadow-sm px-0 sm:px-4 lg:px-12'> {/* Zero padding on mobile */}
+                    <div className="navbar bg-base-100">
                         <div className="navbar-start">
                             <div className="dropdown">
                                 <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                                    </svg>
                                 </div>
                                 <ul
                                     tabIndex={0}
@@ -81,7 +83,7 @@ const Header = () => {
                                     <li><a>FAQ</a></li>
                                     <li>
                                         <details>
-                                            <summary >Parent</summary>
+                                            <summary>Parent</summary>
                                             <ul className="p-2">
                                                 <li><a>Submenu 1</a></li>
                                                 <li><a>Submenu 2</a></li>
@@ -100,7 +102,7 @@ const Header = () => {
                                 <li><a>FAQ</a></li>
                                 <li>
                                     <details>
-                                        <summary >Parent</summary>
+                                        <summary>Parent</summary>
                                         <ul className="p-2">
                                             <li><a>Submenu 1</a></li>
                                             <li><a>Submenu 2</a></li>
@@ -109,8 +111,7 @@ const Header = () => {
                                 </li>
                             </ul>
                         </div>
-                        {/* Right side - Social icons (now properly aligned to far right) */}
-                        <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-0 md:mr-4">
+                        <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-2 sm:mr-4">
                             {/* Login Button */}
                             <Link
                                 to="/login"
@@ -144,7 +145,6 @@ const Header = () => {
                 </div>
             </div>
         </>
-
     )
 }
 

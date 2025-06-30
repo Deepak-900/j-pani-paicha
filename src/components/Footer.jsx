@@ -1,7 +1,7 @@
 import React from 'react'
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa'
 
-const Foooter = () => {
+const Footer = () => {
     return (
         <div className=''>
             <footer className="footer sm:footer-horizontal bg-base-200 text-base-content px-14 py-10">
@@ -68,4 +68,4 @@ const Foooter = () => {
     )
 }
 
-export default Foooter
+export default Footer
