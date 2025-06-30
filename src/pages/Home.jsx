@@ -1,9 +1,9 @@
 import React from 'react'
-import HeroSection from '../components/HeroSection'
-import CardDesign from '../components/CardDesign'
-import CategoryDesign from '../components/CategoryDesign'
-import JustForYou from '../components/JustForYou'
-import PaymentPartners from '../components/PaymentPartners'
+import HeroSection from '../components/home/HeroSection'
+import CardDesign from '../components/home/CardDesign'
+import CategoryDesign from '../components/home/CategoryDesign'
+import JustForYou from '../components/home/JustForYou'
+import PaymentPartners from '../components/home/PaymentPartners'
 
 const Home = () => {
     return (

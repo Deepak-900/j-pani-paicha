@@ -1,5 +1,6 @@
 import React from 'react'
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
     return (
@@ -14,7 +15,7 @@ const Footer = () => {
                 </nav>
                 <nav>
                     <h6 className="footer-title">Company</h6>
-                    <a className="link link-hover">About us</a>
+                    <Link to={'/about'} className="link link-hover">About us</Link>
                     <a className="link link-hover">Contact</a>
                     <a className="link link-hover">Career</a>
                     <a className="link link-hover">FAQ</a>

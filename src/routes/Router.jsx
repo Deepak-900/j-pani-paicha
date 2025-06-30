@@ -2,13 +2,15 @@ import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Home from '../pages/Home'
 import MainLayout from '../components/MainLayout'
+import About from '../pages/About'
 
 const Router = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path='/' element={<MainLayout />}>
+                <Route element={<MainLayout />}>
                     <Route path='' element={<Home />} />
+                    <Route path='about' element={<About />} />
                 </Route>
             </Routes>
         </BrowserRouter >

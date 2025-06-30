@@ -1,11 +1,14 @@
 import React from 'react';
-import Button from './Button';
+import { useNavigate } from 'react-router-dom';
+import Button from '../Button';
 
-const CardDesign = () => {
+const JustForYou = () => {
+    const navigate = useNavigate();
+
     const products = [
         {
             id: 1,
-            title: "Premium Running Shoes",
+            title: "Running Shoes",
             image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
             price: 89.99,
             originalPrice: 120.00,
@@ -15,28 +18,90 @@ const CardDesign = () => {
         },
         {
             id: 2,
-            title: "Wireless Headphones",
-            image: "https://plus.unsplash.com/premium_photo-1679513691474-73102089c117?q=80&w=813&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            price: 149.99,
-            originalPrice: 199.99,
+            title: "Wireless Earbuds",
+            image: "https://plus.unsplash.com/premium_photo-1679513691474-73102089c117",
+            price: 59.99,
+            originalPrice: 79.99,
             rating: 4,
             reviews: 36,
             isNew: false
         },
-        // Add more products as needed
+        {
+            id: 3,
+            title: "Yoga Mat",
+            image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f",
+            price: 29.99,
+            originalPrice: 39.99,
+            rating: 4,
+            reviews: 18,
+            isNew: true
+        },
+        {
+            id: 4,
+            title: "Water Bottle",
+            image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8",
+            price: 19.99,
+            originalPrice: 24.99,
+            rating: 5,
+            reviews: 42,
+            isNew: false
+        },
+        {
+            id: 5,
+            title: "Fitness Tracker",
+            image: "https://images.unsplash.com/photo-1520390138845-fd2d229dd553",
+            price: 79.99,
+            originalPrice: 99.99,
+            rating: 4,
+            reviews: 31,
+            isNew: true
+        },
+        {
+            id: 5,
+            title: "Fitness Tracker",
+            image: "https://images.unsplash.com/photo-1520390138845-fd2d229dd553",
+            price: 79.99,
+            originalPrice: 99.99,
+            rating: 4,
+            reviews: 31,
+            isNew: true
+        },
+        {
+            id: 5,
+            title: "Fitness Tracker",
+            image: "https://images.unsplash.com/photo-1520390138845-fd2d229dd553",
+            price: 79.99,
+            originalPrice: 99.99,
+            rating: 4,
+            reviews: 31,
+            isNew: true
+        },
+        {
+            id: 5,
+            title: "Fitness Tracker",
+            image: "https://images.unsplash.com/photo-1520390138845-fd2d229dd553",
+            price: 79.99,
+            originalPrice: 99.99,
+            rating: 4,
+            reviews: 31,
+            isNew: true
+        }
     ];
+    const handleCardClick = (productId) => {
+        navigate(`/products/${productId}`);
+    };
 
     return (
         <div className='bg-white py-4'>
             {/* Header Section */}
             <div className='px-4 sm:px-6 py-2 flex flex-row justify-between items-center'>
-                <h1 className='text-lg sm:text-xl font-bold text-gray-800'>On Sale Now</h1>
+                <h1 className='text-lg sm:text-xl font-bold text-gray-800'>Featured Products</h1>
                 <Button
                     type='button'
                     outline
                     className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
                 >
-                    SHOP ALL PRODUCTS
+                    VIEW ALL
                 </Button>
             </div>
 
@@ -102,4 +167,4 @@ const CardDesign = () => {
     );
 };
 
-export default CardDesign;
+export default JustForYou;
