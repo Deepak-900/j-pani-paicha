@@ -20,15 +20,7 @@ const Home = () => {
             </div>
 
             {/* Category */}
-            <div className='px-0 sm:px-12'>
-                <h1 className='text-2xl'>Category</h1>
-                <div className='container'>
-                    <div className="rounded shadow-emerald-950">
-                        <CategoryDesign />
-                    </div>
-                </div>
-
-            </div>
+            <CategoryDesign />
 
         </>
     )

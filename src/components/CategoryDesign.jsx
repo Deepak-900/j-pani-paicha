@@ -1,22 +1,45 @@
-import React from 'react'
+import React from 'react';
 
 const CategoryDesign = () => {
+    const categories = [
+        { id: 1, name: "Shoes", image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" },
+        { id: 2, name: "Electronics", image: "https://images.unsplash.com/photo-1518770660439-4636190af475" },
+        { id: 3, name: "Clothing", image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f" },
+        { id: 4, name: "Home Decor", image: "https://images.unsplash.com/photo-1556911220-bff31c812dba" },
+        { id: 5, name: "Accessories", image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea" },
+        { id: 6, name: "Beauty", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9" }
+    ];
+
     return (
-        <div className='flex justify-between flex-wrap gap-1 py-2'>
-            <div className="card bg-base-100 w-[150px] shadow-sm rounded-none transition-all duration-300 ease-in-out 
-                hover:-translate-y-1 hover:shadow-md cursor-pointer">
-                <figure className="px-2 pt-2">
-                    <img
-                        src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-                        alt="Shoes"
-                        className="rounded-xl" />
-                </figure>
-                <div className="card-body items-center text-center p-2">
-                    <h2 className="card-text">Shoes</h2>
-                </div>
+        <div className='container mx-auto px-4 py-6'>
+            <h2 className='text-2xl font-bold mb-6 text-gray-800'>Shop by Category</h2>
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
+                {categories.map((category) => (
+                    <div
+                        key={category.id}
+                        className="group relative bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden 
+                                  transition-all duration-300 ease-in-out hover:shadow-md hover:-translate-y-1 cursor-pointer"
+                    >
+                        <figure className="aspect-square bg-gray-50 flex items-center justify-center p-4">
+                            <img
+                                src={category.image}
+                                alt={category.name}
+                                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://via.placeholder.com/300x300?text=Image+Not+Available";
+                                }}
+                            />
+                        </figure>
+                        <div className="p-3 text-center">
+                            <h3 className="font-medium text-gray-800 text-sm sm:text-base">{category.name}</h3>
+                            <p className="text-xs text-gray-500 mt-1">Shop Now</p>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default CategoryDesign
+export default CategoryDesign;
