@@ -79,7 +79,7 @@ const Header = () => {
                                     <li><Link to={'/'}>Home</Link></li>
                                     <li><Link to={'/about'}>About Us</Link></li>
                                     <li><a>Shop</a></li>
-                                    <li><a>Contact Us</a></li>
+                                    <li><Link to={'/contact'}>Contact Us</Link></li>
                                     <li><a>FAQ</a></li>
                                     <li>
                                         <details>
@@ -98,7 +98,7 @@ const Header = () => {
                                 <li><Link to={'/'}>Home</Link></li>
                                 <li><Link to={'/about'}>About Us</Link></li>
                                 <li><a>Shop</a></li>
-                                <li><a>Contact Us</a></li>
+                                <li><Link to={'/contact'}>Contact Us</Link></li>
                                 <li><a>FAQ</a></li>
                                 <li>
                                     <details>
