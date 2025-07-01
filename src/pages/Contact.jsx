@@ -78,7 +78,7 @@ const ContactPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-medium">Call Us</h3>
-                                        <p className="text-base-content/70">+1 (555) 123-4567</p>
+                                        <p className="text-base-content/70">+977 (984) 367-6425</p>
                                         <p className="text-base-content/70">Mon-Fri: 9am-5pm</p>
                                     </div>
                                 </div>
@@ -89,8 +89,8 @@ const ContactPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-medium">Visit Us</h3>
-                                        <p className="text-base-content/70">123 Tech Street</p>
-                                        <p className="text-base-content/70">San Francisco, CA 94107</p>
+                                        <p className="text-base-content/70">Yangal, Siddhipur Street</p>
+                                        <p className="text-base-content/70">Mahalaxmi-06, Lalitpur,Nepal</p>
                                     </div>
                                 </div>
                             </div>

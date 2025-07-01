@@ -80,7 +80,7 @@ const Header = () => {
                                     <li><Link to={'/about'}>About Us</Link></li>
                                     <li><a>Shop</a></li>
                                     <li><Link to={'/contact'}>Contact Us</Link></li>
-                                    <li><a>FAQ</a></li>
+                                    <li><Link to={'/faq'}>FAQ</Link></li>
                                     <li>
                                         <details>
                                             <summary>Parent</summary>
@@ -99,7 +99,7 @@ const Header = () => {
                                 <li><Link to={'/about'}>About Us</Link></li>
                                 <li><a>Shop</a></li>
                                 <li><Link to={'/contact'}>Contact Us</Link></li>
-                                <li><a>FAQ</a></li>
+                                <li><Link to={'/faq'}>FAQ</Link></li>
                                 <li>
                                     <details>
                                         <summary>Parent</summary>
