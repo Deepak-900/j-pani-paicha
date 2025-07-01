@@ -5,16 +5,18 @@ import MainLayout from '../components/MainLayout'
 import About from '../pages/About'
 import ContactPage from '../pages/Contact'
 import FAQ from '../pages/FAQ'
+import LoginPage from '../pages/Login'
 
 const Router = () => {
     return (
         <BrowserRouter>
             <Routes>
                 <Route element={<MainLayout />}>
-                    <Route path='' element={<Home />} />
+                    <Route index element={<Home />} />
                     <Route path='about' element={<About />} />
                     <Route path='contact' element={<ContactPage />} />
                     <Route path='faq' element={<FAQ />} />
+                    <Route path='login' element={<LoginPage />} />
                 </Route>
             </Routes>
         </BrowserRouter >
