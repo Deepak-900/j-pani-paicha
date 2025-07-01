@@ -34,7 +34,7 @@ const LoginPage = () => {
                         <div className="text-center mb-8">
                             <div className="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                                 <span className="text-3xl font-bold text-white">
-                                    <img src={logo} alt="Logo   " />
+                                    <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                                 </span>
                             </div>
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
@@ -50,7 +50,7 @@ const LoginPage = () => {
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                                        <HiOutlineMail className="h-5 w-5 text-gray-400" />
+                                        <HiOutlineMail className="h-5 w-5 text-gray-400 z-10" />
                                     </div>
                                     <input
                                         type="email"
@@ -70,7 +70,7 @@ const LoginPage = () => {
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                                        <FaLock className="h-4 w-4 text-gray-400" />
+                                        <FaLock className="h-4 w-4 text-gray-400 z-10" />
                                     </div>
                                     <input
                                         type={showPassword ? "text" : "password"}
