@@ -1,7 +1,9 @@
-
 import { useEffect } from 'react';
+import { Provider } from 'react-redux';
 import './App.css';
 import Router from './routes/Router';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store } from './components/redux/store';
 function App() {
 
   useEffect(() => {
@@ -10,10 +12,12 @@ function App() {
 
 
   return (
-    <>
-      {/* It's a Router from './routes/Router' */}
-      <Router />
-    </>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        {/* It's a Router from './routes/Router' */}
+        <Router />
+      </PersistGate >
+    </Provider>
   )
 }
 
