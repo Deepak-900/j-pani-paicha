@@ -3,10 +3,12 @@ import productReducer from './productStore';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 import { persistReducer } from 'redux-persist';
 import persistStore from 'redux-persist/es/persistStore';
+import cartReducer from './cartStore';
 
 
 const rootReducer = combineReducers({
     productStore: productReducer,
+    cartStore: cartReducer
 })
 
 const persistConfig = {
