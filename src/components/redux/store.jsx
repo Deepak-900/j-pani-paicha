@@ -10,7 +10,7 @@ const rootReducer = combineReducers({
 })
 
 const persistConfig = {
-    key: 'root',
+    key: 'jPaniPaichaRoot',
     storage,
 }
 
