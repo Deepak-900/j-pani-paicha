@@ -8,6 +8,7 @@ const ProductDetails = () => {
     const [selectedImage, setSelectedImage] = useState(0);
 
 
+
     let { id } = useParams()
 
     let product = useSelector(state => state.productStore.products.find(product => product.id === parseInt(id)))
@@ -30,7 +31,7 @@ const ProductDetails = () => {
         console.log("Added to cart:", cartItem);
         Swal.fire({
             title: 'Added to Cart',
-            text: `${product.title} has been added to your cart.`,
+            text: `"${product.title}" has been added to your cart.`,
             icon: 'success',
         })
     }

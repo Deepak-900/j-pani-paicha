@@ -2,8 +2,18 @@ import React from 'react'
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaSearch, FaUser, FaUserPlus, FaShoppingCart } from 'react-icons/fa';
 import Logo from './../assets/logo.png'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux';
 
 const Header = () => {
+
+    // Get unique item count from Redux store
+    const uniqueItemCount = useSelector((state) => {
+        const cartItems = state.cartStore.card_items;
+        // Create a Set of unique IDs and get its size
+        const uniqueIds = new Set(cartItems.map(item => item.id));
+        return uniqueIds.size;
+    });
+
     return (
         <>
             <div className="header">
@@ -132,7 +142,12 @@ const Header = () => {
 
                             {/* Cart Button with Badge */}
                             <div className="indicator">
-                                <span className="indicator-item badge badge-primary">3</span>
+                                {
+                                    uniqueItemCount > 0 && (
+                                        <span className="indicator-item badge badge-primary">{uniqueItemCount}</span>
+
+                                    )
+                                }
                                 <Link
                                     to="/cart"
                                     className="btn btn-ghost btn-circle btn-sm md:btn-md hover:bg-gray-100"
