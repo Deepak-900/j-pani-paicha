@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaEdit, FaTrashAlt } from 'react-icons/fa'
 import { FiMinus, FiPlus } from 'react-icons/fi'
 import { useDispatch, useSelector } from 'react-redux'
+import Swal from 'sweetalert2'
 
 const Cart = () => {
 
@@ -9,50 +10,43 @@ const Cart = () => {
 
     const cartItems = useSelector((state) => state.cartStore.card_items)
 
+
     // State to track quantities
-    const [items, setItems] = useState(
-        cartItems.reduce((acc, item) => {
-            const existingItem = acc.find(i => i.id === item.id);
+    const [items, setItems] = useState([])
+
+    // Sync local items with Redux cart items whenever cartItems changes
+    useEffect(() => {
+        const processedItems = cartItems.reduce((acc, item) => {
+            const existingItem = acc.find(i => i.id === item.id)
             if (existingItem) {
-                existingItem.quantity += item.quantity;
-                existingItem.total = existingItem.quantity * existingItem.price;
+                existingItem.quantity += item.quantity
+                existingItem.total = existingItem.quantity * existingItem.price
             } else {
                 acc.push({
-                    ...item, total: item.quantity * item.price
+                    ...item,
+                    total: item.quantity * item.price
                 })
-            } return acc;
+            }
+            return acc
         }, [])
-    )
+        setItems(processedItems)
+    }, [cartItems])
 
     // Handle quantity increase
     const handleIncreaseQuantity = (id) => {
-        setItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id
-                    ? {
-                        ...item,
-                        quantity: item.quantity + 1,
-                        total: item.price * (item.quantity + 1)
-                    }
-                    : item
-            )
-        );
+        dispatch({
+            type: 'INCREASE_QUANTITY',
+            payload: id
+        });
     };
-
     // Handle quantity decrease
     const handleDecreaseQuantity = (id) => {
-        setItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id && item.quantity > 1
-                    ? {
-                        ...item,
-                        quantity: item.quantity - 1,
-                        total: item.price * (item.quantity - 1)
-                    }
-                    : item
-            )
-        );
+        dispatch({
+            type: 'DECREASE_QUANTITY',
+            payload: id
+        });
     };
+
 
     // Calculate grand total
     const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -145,6 +139,15 @@ const Cart = () => {
                                                     <FaEdit className="text-lg" />
                                                 </button>
                                                 <button
+                                                    onClick={() => {
+                                                        dispatch({ type: 'REMOVE_FROM_CART', payload: item.id });
+                                                        Swal.fire({
+                                                            title: 'Item Removed',
+                                                            text: `${item.title} has been removed from your cart.`,
+                                                            icon: 'success',
+                                                            confirmButtonText: 'OK'
+                                                        })
+                                                    }}
                                                     className="p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors duration-200"
                                                     aria-label="Remove item"
                                                 >

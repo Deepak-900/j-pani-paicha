@@ -88,10 +88,10 @@ const Header = () => {
                                     className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                                     <li><Link to={'/'}>Home</Link></li>
                                     <li><Link to={'/about'}>About Us</Link></li>
-                                    <li><a>Shop</a></li>
+                                    <li><Link to={'/shop'}>Shop</Link></li>
                                     <li><Link to={'/contact'}>Contact Us</Link></li>
                                     <li><Link to={'/faq'}>FAQ</Link></li>
-                                    <li>
+                                    {/* <li>
                                         <details>
                                             <summary>Parent</summary>
                                             <ul className="p-2">
@@ -99,7 +99,7 @@ const Header = () => {
                                                 <li><a>Submenu 2</a></li>
                                             </ul>
                                         </details>
-                                    </li>
+                                    </li> */}
                                 </ul>
                             </div>
                         </div>
@@ -107,10 +107,12 @@ const Header = () => {
                             <ul className="menu menu-horizontal px-1">
                                 <li><Link to={'/'}>Home</Link></li>
                                 <li><Link to={'/about'}>About Us</Link></li>
-                                <li><a>Shop</a></li>
+                                <li><Link to={'/shop'}>Shop</Link></li>
                                 <li><Link to={'/contact'}>Contact Us</Link></li>
                                 <li><Link to={'/faq'}>FAQ</Link></li>
-                                <li>
+
+                                {/* if required add uncomment this */}
+                                {/* <li>
                                     <details>
                                         <summary>Parent</summary>
                                         <ul className="p-2">
@@ -118,7 +120,8 @@ const Header = () => {
                                             <li><a>Submenu 2</a></li>
                                         </ul>
                                     </details>
-                                </li>
+                                </li> */}
+
                             </ul>
                         </div>
                         <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-2 sm:mr-4">
