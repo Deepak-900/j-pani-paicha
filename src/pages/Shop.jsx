@@ -57,7 +57,7 @@ const Shop = () => {
         if (newSearchTerm !== filters.searchTerm) {
             setFilters(prev => ({ ...prev, searchTerm: newSearchTerm }));
         }
-    }, [searchParams.get('search')]);
+    }, [searchParams, filters.searchTerm]);
 
     const generatePriceRanges = (maxPrice) => {
         const ranges = [];
