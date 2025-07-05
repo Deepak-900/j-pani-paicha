@@ -17,6 +17,8 @@ const Shop = () => {
         ratings: []
     });
 
+    const [showAllCategories, setShowAllCategories] = useState(false);
+
     useEffect(() => {
         if (products.length > 0) {
             const uniqueCategories = [...new Set(products.map(product => product.category))];
@@ -54,24 +56,38 @@ const Shop = () => {
             rating: '',
             sortBy: 'featured',
         });
+        setShowAllCategories(false);
     };
+
+    const toggleCategoryView = () => {
+        setShowAllCategories(!showAllCategories);
+    };
+
+    const visibleCategories = showAllCategories
+        ? filterOptions.categories
+        : filterOptions.categories.slice(0, 5);
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row gap-8">
+                {/* Filters Sidebar */}
                 <aside className="w-full md:w-72 shrink-0">
                     <div className="bg-base-100 p-6 rounded-lg shadow-sm sticky top-4">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold">Filters</h2>
-                            <button onClick={clearFilters} className="text-sm text-primary hover:underline">
+                            <button
+                                onClick={clearFilters}
+                                className="text-sm text-primary hover:underline"
+                            >
                                 Clear all
                             </button>
                         </div>
 
+                        {/* Categories Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Categories</h3>
                             <div className="space-y-2">
-                                {filterOptions.categories.map(category => (
+                                {visibleCategories.map(category => (
                                     <div key={category} className="flex items-center">
                                         <input
                                             type="radio"
@@ -88,8 +104,17 @@ const Shop = () => {
                                     </div>
                                 ))}
                             </div>
+                            {filterOptions.categories.length > 5 && (
+                                <button
+                                    onClick={toggleCategoryView}
+                                    className="text-primary mt-2 text-sm font-medium hover:underline"
+                                >
+                                    {showAllCategories ? 'See Less' : 'See More'}
+                                </button>
+                            )}
                         </div>
 
+                        {/* Price Range Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Price Range</h3>
                             <div className="space-y-2">
@@ -112,6 +137,7 @@ const Shop = () => {
                             </div>
                         </div>
 
+                        {/* Rating Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Customer Rating</h3>
                             <div className="space-y-2">
@@ -136,20 +162,23 @@ const Shop = () => {
                     </div>
                 </aside>
 
+                {/* Main Content */}
                 <main className="flex-1">
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <h1 className="text-2xl font-bold">
-
-                            All Products
+                            {filters.category
+                                ? `${filters.category.replace(/-/g, ' ')} Products`
+                                : 'All Products'
+                            }
                         </h1>
-                        <div className="flex items-center">
-                            <label htmlFor="sort" className="mr-2">Sort by:</label>
+                        <div className="flex items-center w-full sm:w-auto">
+                            <label htmlFor="sort" className="mr-2 whitespace-nowrap">Sort by:</label>
                             <select
                                 id="sort"
                                 name="sortBy"
                                 value={filters.sortBy}
                                 onChange={handleFilterChange}
-                                className="select select-bordered select-sm"
+                                className="select select-bordered select-sm w-full sm:w-auto"
                             >
                                 <option value="featured">Featured</option>
                                 <option value="price-low">Price: Low to High</option>

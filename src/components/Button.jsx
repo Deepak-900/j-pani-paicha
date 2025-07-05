@@ -1,80 +1,93 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const Button = ({
-    to = '#',           // Default link target
-    type = 'button',    // Button type (button, submit, etc.)
-    onClick,            // Click handler
-    children,           // Button content
-    className = '',     // Additional classes
-    variant = 'primary', // Button variant
-    size = 'md',        // Button size
-    outline = false,    // Outline style
-    fullWidth = false,  // Full width button
-    disabled = false,   // Disabled state
-    hiddenOnMobile = false, // Hide on mobile
-    visibleOnMobile = true, // Show on mobile (alternative approach)
+    to,
+    type = 'button',
+    onClick,
+    children,
+    className = '',
+    variant = 'primary',
+    size = 'md',
+    outline = false,
+    fullWidth = false,
+    disabled = false,
+    hiddenOnMobile = false,
+    ...restProps // Capture all other props
 }) => {
     // Base button classes
-    const baseClasses = 'btn';
+    const baseClasses = 'btn inline-flex items-center justify-center transition-colors';
 
-    // Variant classes
-    const variantClass = outline ? `btn-outline btn-${variant}` : `btn-${variant}`;
+    // Variant classes - modified to prevent class name conflicts
+    const variantClass = outline ? `btn-outline-${variant}` : `btn-${variant}`;
 
     // Size classes
-    const sizeClass = `btn-${size}`;
+    const sizeClasses = {
+        sm: 'text-xs py-1 px-2',
+        md: 'text-sm py-2 px-4',
+        lg: 'text-base py-3 px-6'
+    };
 
     // Responsive classes
-    const responsiveClass = hiddenOnMobile ? 'hidden sm:flex' : '';
+    const responsiveClass = hiddenOnMobile ? 'hidden sm:inline-flex' : '';
 
     // Full width class
     const widthClass = fullWidth ? 'w-full' : '';
 
     // Combine all classes
-    const combinedClasses = `${baseClasses} ${variantClass} ${sizeClass} ${responsiveClass} ${widthClass} ${className}`.trim();
+    const combinedClasses = `${baseClasses} ${variantClass} ${sizeClasses[size]} ${responsiveClass} ${widthClass} ${className}`.trim();
 
-    // Render as Link if 'to' prop is provided, otherwise render as button
-    if (to) {
+    // If disabled, prevent onClick and modify styles
+    const handleClick = (e) => {
+        if (disabled) {
+            e.preventDefault();
+            return;
+        }
+        onClick && onClick(e);
+    };
+
+    // Render as Link if 'to' prop is provided and not disabled
+    if (to && !disabled) {
         return (
             <Link
                 to={to}
                 className={combinedClasses}
-                onClick={onClick}
+                onClick={handleClick}
+                {...restProps} // Spread additional props
+                aria-disabled={disabled ? "true" : undefined}
             >
                 {children}
             </Link>
         );
     }
 
+    // Default button render
     return (
         <button
             type={type}
             className={combinedClasses}
-            onClick={onClick}
+            onClick={handleClick}
             disabled={disabled}
+            {...restProps} // Spread additional props
         >
             {children}
         </button>
     );
 };
 
+Button.propTypes = {
+    to: PropTypes.string,
+    type: PropTypes.oneOf(['button', 'submit', 'reset']),
+    onClick: PropTypes.func,
+    children: PropTypes.node.isRequired,
+    className: PropTypes.string,
+    variant: PropTypes.oneOf(['primary', 'secondary', 'success', 'danger', 'warning', 'info']),
+    size: PropTypes.oneOf(['sm', 'md', 'lg']),
+    outline: PropTypes.bool,
+    fullWidth: PropTypes.bool,
+    disabled: PropTypes.bool,
+    hiddenOnMobile: PropTypes.bool,
+};
+
 export default Button;
-
-
-// // Basic primary button
-// <Button>Click Me</Button>
-
-// // Outline button with link
-// <Button to="/register" outline>Register</Button>
-
-// // Large secondary button
-// <Button variant="secondary" size="lg">Big Button</Button>
-
-// // Full width button hidden on mobile
-// <Button fullWidth hiddenOnMobile>Wide Button</Button>
-
-// // Submit button for forms
-// <Button type="submit">Submit Form</Button>
-
-// // Disabled button
-// <Button disabled>Can't Click</Button>

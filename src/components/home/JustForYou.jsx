@@ -115,9 +115,9 @@ const JustForYou = ({ filters = {} }) => {
                     }
                 </h1>
 
-                <Button type='button' outline className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4">
-                    <Link to='/shop'>VIEW ALL</Link>
-                </Button>
+                <button type='button' onClick={() => navigate('/shop')} className=" btn btn-outline btn-primary text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4">
+                    VIEW ALL
+                </button>
 
             </div>
 
@@ -143,9 +143,9 @@ const JustForYou = ({ filters = {} }) => {
                                                 className="absolute top-0 left-0 w-full h-full object-cover"
                                                 loading="lazy"
                                             />
-                                            {product.isNew && (
+                                            {product.discountPercentage > 5 && (
                                                 <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                                    New
+                                                    {Math.round(product.discountPercentage)}% OFF
                                                 </span>
                                             )}
                                         </div>
@@ -172,7 +172,7 @@ const JustForYou = ({ filters = {} }) => {
                                                 {product.title}
                                             </h3>
 
-                                            <div className="flex flex-row items-center gap-2">
+                                            <div className="flex flex-row items-center gap-2 flex-wrap">
                                                 {product.discountPercentage && (
                                                     <span className="text-gray-500 line-through text-xs">
                                                         ${(product.price / (1 - product.discountPercentage / 100)).toFixed(2)}
@@ -181,6 +181,7 @@ const JustForYou = ({ filters = {} }) => {
                                                 <span className="text-base font-bold text-gray-900">
                                                     ${product.price?.toFixed(2) || 'N/A'}
                                                 </span>
+
                                             </div>
                                         </div>
                                     </div>
@@ -195,10 +196,10 @@ const JustForYou = ({ filters = {} }) => {
                         {filteredProducts.length > 0 && (
                             <div className='flex justify-center gap-3 my-5'>
                                 {displayCount < filteredProducts.length ? (
-                                    <Button
+                                    <button
                                         type='button'
                                         outline
-                                        className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
+                                        className="btn btn-outline btn-primary  text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
                                         onClick={handleLoadMore}
                                         disabled={localLoading}
                                     >
@@ -209,22 +210,22 @@ const JustForYou = ({ filters = {} }) => {
                                                 <FaChevronDown className='me-2' /> Load More
                                             </>
                                         )}
-                                    </Button>
+                                    </button>
                                 ) : (
-                                    <Button
+                                    <button
                                         type='button'
-                                        className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4 bg-gray-300 text-gray-600 cursor-not-allowed"
+                                        className="btn btn-outline btn-primary text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4 bg-gray-300 text-gray-600 cursor-not-allowed"
                                         disabled
                                     >
                                         No More Products
-                                    </Button>
+                                    </button>
                                 )}
 
                                 {displayCount > 10 && (
                                     <Button
                                         type='button'
                                         outline
-                                        className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
+                                        className="btn btn-outline btn-primary text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
                                         onClick={handleShowLess}
                                     >
                                         <FaChevronUp className='me-2' /> SHOW LESS

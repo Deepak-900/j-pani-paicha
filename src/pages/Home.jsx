@@ -3,11 +3,12 @@ import CardDesign from '../components/home/CardDesign'
 import CategoryDesign from '../components/home/CategoryDesign'
 import JustForYou from '../components/home/JustForYou'
 import PaymentPartners from '../components/home/PaymentPartners'
-import Button from '../components/Button'
-
+import { useNavigate } from 'react-router-dom'
 
 
 const Home = () => {
+
+    const navigate = useNavigate()
 
     return (
         <>
@@ -26,13 +27,9 @@ const Home = () => {
                             {/* Header Section */}
                             <div className='px-4 sm:px-6 py-2 flex flex-row justify-between items-center'>
                                 <h1 className='text-lg sm:text-xl font-bold text-gray-800'>On Sale Now</h1>
-                                <Button
-                                    type='button'
-                                    outline
-                                    className="text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
-                                >
-                                    SHOP ALL PRODUCTS
-                                </Button>
+                                <button type='button' onClick={() => navigate('/shop')} className=" btn btn-outline btn-primary text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4">
+                                    SHOW ALL PRODUCTS
+                                </button>
                             </div>
                             {/* Responsive Product Grid */}
 
