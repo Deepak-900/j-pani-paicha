@@ -5,11 +5,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import Swal from 'sweetalert2'
 
 const Cart = () => {
-
+    let deliveryCharge = 12;
     const dispatch = useDispatch()
-
     const cartItems = useSelector((state) => state.cartStore.card_items)
-
 
     // State to track quantities
     const [items, setItems] = useState([])
@@ -39,6 +37,7 @@ const Cart = () => {
             payload: id
         });
     };
+
     // Handle quantity decrease
     const handleDecreaseQuantity = (id) => {
         dispatch({
@@ -48,11 +47,127 @@ const Cart = () => {
     };
 
 
+    const handleRemoveFromCart = async (item) => {
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            title: 'Remove this item?',
+            html: `<p>Remove <strong>${item.title}</strong> from your cart?</p>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove',
+            cancelButtonText: 'Keep it',
+            focusCancel: true,
+            backdrop: `
+      rgba(0,0,0,0.4)
+      url("/images/trash-can.gif")
+      left top
+      no-repeat
+    `
+        });
+
+        // Only remove if confirmed
+        if (result.isConfirmed) {
+            try {
+                dispatch({ type: 'REMOVE_FROM_CART', payload: item.id });
+
+                await Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Item removed',
+                    text: `${item.title} was removed from your cart`,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    toast: true
+                });
+            } catch (error) {
+                Swal.fire(
+                    'Error',
+                    'Failed to remove item from cart',
+                    'error'
+                );
+            }
+        }
+    };
+
+
+    // Handle clear all cart items
+    const handleClearCart = async () => {
+        const result = await Swal.fire({
+            title: 'Clear Entire Cart?',
+            html: `
+      <div class="text-left">
+        <p>This will remove <strong>${items.length} item${items.length !== 1 ? 's' : ''}</strong> from your cart:</p>
+        <ul class="max-h-40 overflow-y-auto mt-2 pl-4">
+          ${items.slice(0, 5).map(item =>
+                `<li class="truncate font-bold">&gt; ${item.title}</li>`
+            ).join('')}
+          ${items.length > 5 ? `<li>...and ${items.length - 5} more</li>` : ''}
+        </ul>
+      </div>
+    `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: `Clear All (${items.length})`,
+            cancelButtonText: 'Keep Items',
+            focusCancel: true,
+            scrollbarPadding: false,
+            backdrop: 'rgba(0,0,0,0.7)',
+            width: '32rem',
+            customClass: {
+                container: 'text-left',
+                htmlContainer: 'text-left'
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                dispatch({ type: 'CLEAR_CART' });
+
+                await Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Cart Cleared',
+                    html: `Removed ${items.length} item${items.length !== 1 ? 's' : ''}`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    toast: true,
+                    width: '300px'
+                });
+
+                // Optional: Track analytics event
+                // analytics.track('Cart Cleared', { itemCount: items.length });
+            } catch (error) {
+                Swal.fire(
+                    'Error',
+                    'Failed to clear the cart',
+                    'error'
+                );
+            }
+        }
+    };
+
     // Calculate grand total
-    const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+    const grandTotal = items.reduce((sum, item) => sum + item.total, 0); //+12 is a static delivery charge
+    const totalWithDelivery = (grandTotal + deliveryCharge).toFixed(2);
+
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4 text-center">Your Shopping Cart</h1>
+        <div className="container mx-auto p-10">
+            <div className="flex justify-between items-center mb-4 px-4">
+                <h1 className="text-2xl font-bold">Shopping Cart</h1>
+                {items.length > 0 && (
+                    <button
+                        onClick={handleClearCart}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center"
+                    >
+                        <FaTrashAlt className="mr-2" />
+                        Clear Cart
+                    </button>
+                )}
+            </div>
 
             {items.length === 0 ? (
                 <div className="text-center py-8">
@@ -133,25 +248,12 @@ const Cart = () => {
                                         <td className="py-4 px-6">
                                             <div className="flex justify-center space-x-2">
                                                 <button
-                                                    className="p-2 rounded-full text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                                                    aria-label="Edit item"
+                                                    onClick={() => handleRemoveFromCart(item)}
+                                                    className="p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors duration-200 group"
+                                                    aria-label={`Remove ${item.title} from cart`}
+                                                    title="Remove item"
                                                 >
-                                                    <FaEdit className="text-lg" />
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        dispatch({ type: 'REMOVE_FROM_CART', payload: item.id });
-                                                        Swal.fire({
-                                                            title: 'Item Removed',
-                                                            text: `${item.title} has been removed from your cart.`,
-                                                            icon: 'success',
-                                                            confirmButtonText: 'OK'
-                                                        })
-                                                    }}
-                                                    className="p-2 rounded-full text-red-600 hover:bg-red-50 transition-colors duration-200"
-                                                    aria-label="Remove item"
-                                                >
-                                                    <FaTrashAlt className="text-lg" />
+                                                    <FaTrashAlt className="text-lg group-hover:scale-110 transition-transform" />
                                                 </button>
                                             </div>
                                         </td>
@@ -167,23 +269,28 @@ const Cart = () => {
                                         ${items.reduce((sum, item) => sum + item.total, 0).toFixed(2)}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td colSpan="6" className="py-4 px-6 text-right text-lg font-medium text-gray-600">
+                                        Shipping:
+                                    </td>
+                                    <td className="py-4 px-6 text-right text-lg font-bold text-gray-900">
+                                        ${deliveryCharge.toFixed(2)}
+                                    </td>
+                                </tr>
                                 <tr className="bg-gray-100">
                                     <td colSpan="6" className="py-4 px-6 text-right text-xl font-bold text-gray-800">
                                         Grand Total:
                                     </td>
                                     <td className="py-4 px-6 text-right text-xl font-bold text-gray-900">
-                                        ${grandTotal.toFixed(2)}
+                                        {totalWithDelivery}
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-
-
                 </div>
-            )
-            }
-        </div >
+            )}
+        </div>
     )
 }
 
