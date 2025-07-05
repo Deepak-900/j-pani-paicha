@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const CardDesign = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch()
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -14,6 +18,7 @@ const CardDesign = () => {
                 }
                 const data = await response.json();
                 setProducts(data.products);
+                dispatch({ type: 'FETCH_PRODUCTS_SUCCESS', payload: data.products });
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -23,11 +28,10 @@ const CardDesign = () => {
         };
 
         fetchProducts();
-    }, []);
+    }, [dispatch]);
 
-    const handleCardClick = (id) => {
-        console.log(`Product ${id} clicked`);
-        // Add your navigation logic here
+    const handleCardClick = (productId) => {
+        navigate(`/products/${productId}`);
     };
 
     if (loading) return <div className="text-center py-8">Loading products...</div>;
@@ -40,7 +44,7 @@ const CardDesign = () => {
                 <div
                     key={product.id}
                     className="w-full overflow-hidden rounded-lg bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                    onClick={() => handleCardClick(product.id)}
+                    onClick={() => handleCardClick(Number(product.id))}
                 >
                     {/* Card Image */}
                     <div className="relative pb-[100%]">

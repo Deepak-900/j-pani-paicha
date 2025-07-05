@@ -139,10 +139,8 @@ const Shop = () => {
                 <main className="flex-1">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold">
-                            {filters.category ?
-                                `${filters.category.replace(/-/g, ' ')} Products` :
-                                'All Products'
-                            }
+
+                            All Products
                         </h1>
                         <div className="flex items-center">
                             <label htmlFor="sort" className="mr-2">Sort by:</label>
