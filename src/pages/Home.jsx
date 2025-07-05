@@ -45,6 +45,7 @@ const Home = () => {
             < div className='px-0 sm:px-12 pb-4' >
                 <div className='category-container'>
                     <div className="rounded shadow-emerald-950">
+
                         <CategoryDesign />
                     </div>
                 </div>

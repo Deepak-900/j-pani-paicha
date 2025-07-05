@@ -10,7 +10,7 @@ const CardDesign = () => {
     const [randomProducts, setRandomProducts] = useState([]);
     const navigate = useNavigate();
 
-    console.log(randomProducts)
+    // console.log(randomProducts)
 
     // Function to shuffle array with Fisher-Yates algorithm
     const shuffleArray = (array) => {

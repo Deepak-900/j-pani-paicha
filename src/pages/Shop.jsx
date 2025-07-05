@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import JustForYou from '../components/home/JustForYou';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
+import JustForYou from '../components/home/JustForYou';
 
 const Shop = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const products = useSelector(store => store.productStore.products);
+
     const [filters, setFilters] = useState({
-        category: '',
+        category: searchParams.get('category') || '',
         priceRange: '',
         rating: '',
         sortBy: 'featured',
@@ -24,7 +27,7 @@ const Shop = () => {
             const uniqueCategories = [...new Set(products.map(product => product.category))];
             const maxPrice = Math.max(...products.map(p => p.price));
             const priceRanges = generatePriceRanges(maxPrice);
-            const ratings = ['4 & Up', '3 & Up', '2 & Up', '1 & Up'];
+            const ratings = ['4', '3', '2', '1']; // Simplified for JustForYou component
 
             setFilterOptions({
                 categories: uniqueCategories,
@@ -33,6 +36,15 @@ const Shop = () => {
             });
         }
     }, [products]);
+
+    useEffect(() => {
+        const params = {};
+        if (filters.category) params.category = filters.category;
+        if (filters.priceRange) params.priceRange = filters.priceRange;
+        if (filters.rating) params.rating = filters.rating;
+        if (filters.sortBy !== 'featured') params.sortBy = filters.sortBy;
+        setSearchParams(params);
+    }, [filters, setSearchParams]);
 
     const generatePriceRanges = (maxPrice) => {
         const ranges = [];
@@ -70,7 +82,6 @@ const Shop = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row gap-8">
-                {/* Filters Sidebar */}
                 <aside className="w-full md:w-72 shrink-0">
                     <div className="bg-base-100 p-6 rounded-lg shadow-sm sticky top-4">
                         <div className="flex justify-between items-center mb-6">
@@ -83,7 +94,6 @@ const Shop = () => {
                             </button>
                         </div>
 
-                        {/* Categories Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Categories</h3>
                             <div className="space-y-2">
@@ -114,7 +124,6 @@ const Shop = () => {
                             )}
                         </div>
 
-                        {/* Price Range Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Price Range</h3>
                             <div className="space-y-2">
@@ -137,7 +146,6 @@ const Shop = () => {
                             </div>
                         </div>
 
-                        {/* Rating Filter */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Customer Rating</h3>
                             <div className="space-y-2">
@@ -153,7 +161,7 @@ const Shop = () => {
                                             className="radio radio-primary radio-sm"
                                         />
                                         <label htmlFor={`rating-${rating}`} className="ml-2">
-                                            {rating}
+                                            {rating} & Up
                                         </label>
                                     </div>
                                 ))}
@@ -162,33 +170,7 @@ const Shop = () => {
                     </div>
                 </aside>
 
-                {/* Main Content */}
                 <main className="flex-1">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <h1 className="text-2xl font-bold">
-                            {filters.category
-                                ? `${filters.category.replace(/-/g, ' ')} Products`
-                                : 'All Products'
-                            }
-                        </h1>
-                        <div className="flex items-center w-full sm:w-auto">
-                            <label htmlFor="sort" className="mr-2 whitespace-nowrap">Sort by:</label>
-                            <select
-                                id="sort"
-                                name="sortBy"
-                                value={filters.sortBy}
-                                onChange={handleFilterChange}
-                                className="select select-bordered select-sm w-full sm:w-auto"
-                            >
-                                <option value="featured">Featured</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
-                                <option value="rating">Customer Rating</option>
-                                <option value="newest">Newest Arrivals</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <JustForYou filters={filters} />
                 </main>
             </div>
