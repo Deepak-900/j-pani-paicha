@@ -7,11 +7,15 @@ const Shop = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const products = useSelector(store => store.productStore.products);
 
+    // Get search term from URL
+    const searchTerm = searchParams.get('search') || '';
+
     const [filters, setFilters] = useState({
         category: searchParams.get('category') || '',
         priceRange: '',
         rating: '',
         sortBy: 'featured',
+        searchTerm: searchTerm // Add search term to filters
     });
 
     const [filterOptions, setFilterOptions] = useState({
@@ -27,7 +31,7 @@ const Shop = () => {
             const uniqueCategories = [...new Set(products.map(product => product.category))];
             const maxPrice = Math.max(...products.map(p => p.price));
             const priceRanges = generatePriceRanges(maxPrice);
-            const ratings = ['4', '3', '2', '1']; // Simplified for JustForYou component
+            const ratings = ['4', '3', '2', '1'];
 
             setFilterOptions({
                 categories: uniqueCategories,
@@ -43,8 +47,17 @@ const Shop = () => {
         if (filters.priceRange) params.priceRange = filters.priceRange;
         if (filters.rating) params.rating = filters.rating;
         if (filters.sortBy !== 'featured') params.sortBy = filters.sortBy;
+        if (filters.searchTerm) params.search = filters.searchTerm;
         setSearchParams(params);
     }, [filters, setSearchParams]);
+
+    // Update filters when search term changes in URL
+    useEffect(() => {
+        const newSearchTerm = searchParams.get('search') || '';
+        if (newSearchTerm !== filters.searchTerm) {
+            setFilters(prev => ({ ...prev, searchTerm: newSearchTerm }));
+        }
+    }, [searchParams.get('search')]);
 
     const generatePriceRanges = (maxPrice) => {
         const ranges = [];
@@ -67,6 +80,7 @@ const Shop = () => {
             priceRange: '',
             rating: '',
             sortBy: 'featured',
+            searchTerm: '' // Also clear search term
         });
         setShowAllCategories(false);
     };
@@ -93,6 +107,16 @@ const Shop = () => {
                                 Clear all
                             </button>
                         </div>
+
+                        {/* Search term display */}
+                        {filters.searchTerm && (
+                            <div className="mb-6">
+                                <h3 className="font-semibold mb-2">Search Results For:</h3>
+                                <div className="bg-gray-100 px-3 py-2 rounded-md">
+                                    "{filters.searchTerm}"
+                                </div>
+                            </div>
+                        )}
 
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Categories</h3>
@@ -124,6 +148,7 @@ const Shop = () => {
                             )}
                         </div>
 
+                        {/* Rest of your filter sections remain the same */}
                         <div className="mb-6">
                             <h3 className="font-semibold mb-3">Price Range</h3>
                             <div className="space-y-2">
@@ -171,7 +196,8 @@ const Shop = () => {
                 </aside>
 
                 <main className="flex-1">
-                    <JustForYou filters={filters} />
+                    {/* Pass both filters and searchTerm to JustForYou */}
+                    <JustForYou filters={filters} searchTerm={filters.searchTerm} />
                 </main>
             </div>
         </div>

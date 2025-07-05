@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
 
-const JustForYou = ({ filters = {} }) => {
+const JustForYou = ({ filters = {}, searchTerm = '' }) => {
     const navigate = useNavigate();
     const { products, loading } = useSelector(store => store.productStore);
     const [displayCount, setDisplayCount] = useState(10);
@@ -22,6 +22,17 @@ const JustForYou = ({ filters = {} }) => {
 
     const filteredProducts = useMemo(() => {
         let result = [...products];
+
+        // Search term filter
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            result = result.filter(product =>
+                product.title.toLowerCase().includes(term) ||
+                product.description.toLowerCase().includes(term) ||
+                product.category.toLowerCase().includes(term) ||
+                product.brand?.toLowerCase().includes(term)
+            );
+        }
 
         // Category filter
         if (filters.category) {
@@ -60,7 +71,7 @@ const JustForYou = ({ filters = {} }) => {
             default:
                 return result;
         }
-    }, [products, filters]);
+    }, [products, filters, searchTerm]);
 
     useEffect(() => {
         if (products.length === 0 && !loading) {
@@ -82,7 +93,7 @@ const JustForYou = ({ filters = {} }) => {
 
     useEffect(() => {
         setDisplayCount(10);
-    }, [filters.category, filters.priceRange, filters.rating, filters.sortBy]);
+    }, [filters.category, filters.priceRange, filters.rating, filters.sortBy, searchTerm]);
 
     const handleCardClick = (productId) => {
         navigate(`/products/${productId}`);
@@ -105,12 +116,17 @@ const JustForYou = ({ filters = {} }) => {
     const visibleProducts = filteredProducts.slice(0, displayCount);
 
     const formatCategoryName = (category) => {
-        if (!category) return 'Featured Products';
+        if (!category && !searchTerm) return 'Featured Products';
+        if (searchTerm) return `Search Results for "${searchTerm}"`;
         return category
             .replace(/-/g, ' ')
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ') + ' Products';
+    };
+
+    const clearSearch = () => {
+        navigate('/shop');
     };
 
     return (
@@ -120,13 +136,13 @@ const JustForYou = ({ filters = {} }) => {
                     {formatCategoryName(filters.category)}
                 </h1>
 
-                {filters.category && (
+                {(filters.category || searchTerm) && (
                     <button
                         type='button'
-                        onClick={() => navigate('/shop')}
+                        onClick={clearSearch}
                         className="btn btn-outline btn-primary text-xs sm:text-sm whitespace-nowrap py-1 px-3 sm:py-2 sm:px-4"
                     >
-                        VIEW ALL CATEGORIES
+                        {searchTerm ? 'CLEAR SEARCH' : 'VIEW ALL CATEGORIES'}
                     </button>
                 )}
             </div>
@@ -137,6 +153,26 @@ const JustForYou = ({ filters = {} }) => {
                 </div>
             ) : (
                 <>
+                    {searchTerm && filteredProducts.length === 0 && (
+                        <div className="text-center py-10 px-4">
+                            <div className="flex justify-center mb-4">
+                                <FaSearch className="text-4xl text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-700 mb-2">
+                                No products found for "{searchTerm}"
+                            </h3>
+                            <p className="text-gray-500 mb-4">
+                                Try different keywords or check out our featured products
+                            </p>
+                            <button
+                                onClick={clearSearch}
+                                className="btn btn-primary"
+                            >
+                                Browse All Products
+                            </button>
+                        </div>
+                    )}
+
                     <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 px-4 sm:gap-4 sm:px-6'>
                         {visibleProducts.length > 0 ? (
                             visibleProducts.map((product) => (
@@ -194,11 +230,11 @@ const JustForYou = ({ filters = {} }) => {
                                     </div>
                                 </div>
                             ))
-                        ) : (
+                        ) : !searchTerm && (
                             <div className="col-span-full text-center py-10">
                                 <p className="text-gray-500">No products match your filters.</p>
                                 <button
-                                    onClick={() => navigate('/shop')}
+                                    onClick={clearSearch}
                                     className="btn btn-primary mt-4"
                                 >
                                     Clear Filters
