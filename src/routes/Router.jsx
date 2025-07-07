@@ -10,6 +10,7 @@ import Register from '../pages/Register'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/Cart'
 import Shop from '../pages/Shop'
+import Dashboard from '../pages/dashboard/Dashboard'
 
 const Router = () => {
     return (
@@ -25,6 +26,8 @@ const Router = () => {
                     <Route path='login' element={<Login />} />
                     <Route path='register' element={<Register />} />
                     <Route path='cart' element={<Cart />} />
+                    <Route path='dashboard' element={<Dashboard />} />
+
                 </Route>
             </Routes>
         </BrowserRouter >

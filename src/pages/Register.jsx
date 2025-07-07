@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import logo from './../assets/logo.png'; // Adjust the path as necessary        
-import { FaUser, FaEnvelope, FaLock, FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
+        phone: '',
         password: '',
         confirmPassword: ''
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [apiError, setApiError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -20,234 +24,274 @@ const Register = () => {
             ...prev,
             [name]: value
         }));
+        // Clear error when user types
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+    const handleFirstLastChange = (e) => {
+        const { name, value } = e.target;
+
+        // Special handling for name fields
+        if (name === 'firstName' || name === 'lastName') {
+            // Remove any numbers that might be pasted
+            const lettersOnly = value.replace(/[^A-Za-z\s\-']/g, '');
+            setFormData(prev => ({
+                ...prev,
+                [name]: lettersOnly
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+
+        // Clear error when user types
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const input = e.target.value;
+        // Remove ALL non-digit characters (only keep 0-9)
+        const numbersOnly = input.replace(/\D/g, '');
+
+        setFormData(prev => ({
+            ...prev,
+            phone: numbersOnly
+        }));
+
+        // Clear error when user types
+        if (errors.phone) {
+            setErrors(prev => ({ ...prev, phone: '' }));
+        }
     };
 
     const validateForm = () => {
         const newErrors = {};
+        let isValid = true;
 
-        if (!formData.name.trim()) {
-            newErrors.name = 'Full name is required';
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = 'First name is required';
+            isValid = false;
+        } else if (!/^[A-Za-z\s\-']+$/.test(formData.firstName)) {
+            newErrors.firstName = 'First name should only contain letters';
+            isValid = false;
+        }
+
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = 'Last name is required';
+            isValid = false;
         }
 
         if (!formData.email.trim()) {
             newErrors.email = 'Email is required';
+            isValid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email';
+            newErrors.email = 'Invalid email format';
+            isValid = false;
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+            isValid = false;
         }
 
         if (!formData.password) {
             newErrors.password = 'Password is required';
+            isValid = false;
         } else if (formData.password.length < 8) {
             newErrors.password = 'Password must be at least 8 characters';
+            isValid = false;
         }
 
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
+            isValid = false;
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            setIsLoading(true);
-            // Simulate API call
-            setTimeout(() => {
-                setIsLoading(false);
-                // Handle registration logic here
-                console.log('Registration data:', formData);
-            }, 1500);
+        setApiError('');
+
+        if (!validateForm()) return;
+
+        setIsLoading(true);
+
+        try {
+            const { confirmPassword, ...userData } = formData;
+            const response = await axios.post('http://localhost:5000/api/v1/auth/register', userData);
+
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            setApiError(error.response?.data?.message || 'Registration failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                {/* Registration Card */}
-                <div className="card bg-white shadow-2xl overflow-hidden">
-                    {/* Decorative Header */}
-                    <div className="bg-gradient-to-r from-primary to-secondary h-3"></div>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+                <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
 
-                    <div className="card-body p-8">
-                        {/* Logo and Welcome */}
-                        <div className="text-center mb-8">
-                            <div className="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+                {apiError && (
+                    <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+                        {apiError}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">First Name</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaUser className="text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleFirstLastChange}
+                                    onSubmit={handleChange}
+                                    className={`w-full pl-10 pr-3 py-2 border rounded ${errors.firstName ? 'border-red-500' : 'border-gray-300'}`}
+                                    placeholder="John"
+                                />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-                            <p className="text-gray-600">Join JPaniPaicha today</p>
+                            {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                         </div>
 
-                        {/* Registration Form */}
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Name Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-gray-600">Full Name</span>
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaUser className="h-5 w-5 text-gray-400 z-10" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        placeholder="John Doe"
-                                        className={`input input-bordered w-full pl-10 ${errors.name ? 'input-error' : ''}`}
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                    />
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Last Name</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaUser className="text-gray-400" />
                                 </div>
-                                {errors.name && <span className="text-error text-sm">{errors.name}</span>}
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleFirstLastChange}
+                                    onSubmit={handleChange}
+                                    className={`w-full pl-10 pr-3 py-2 border rounded ${errors.lastName ? 'border-red-500' : 'border-gray-300'}`}
+                                    placeholder="Doe"
+                                />
                             </div>
-
-                            {/* Email Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-gray-600">Email Address</span>
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaEnvelope className="h-5 w-5 text-gray-400 z-10" />
-                                    </div>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        placeholder="your@email.com"
-                                        className={`input input-bordered w-full pl-10 ${errors.email ? 'input-error' : ''}`}
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                {errors.email && <span className="text-error text-sm">{errors.email}</span>}
-                            </div>
-
-                            {/* Password Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-gray-600">Password</span>
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaLock className="h-5 w-5 text-gray-400 z-10" />
-                                    </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        name="password"
-                                        placeholder="••••••••"
-                                        className={`input input-bordered w-full pl-10 pr-10 ${errors.password ? 'input-error' : ''}`}
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? (
-                                            <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                        ) : (
-                                            <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                        )}
-                                    </button>
-                                </div>
-                                {errors.password && <span className="text-error text-sm">{errors.password}</span>}
-                            </div>
-
-                            {/* Confirm Password Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-gray-600">Confirm Password</span>
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaLock className="h-5 w-5 text-gray-400 z-10" />
-                                    </div>
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        name="confirmPassword"
-                                        placeholder="••••••••"
-                                        className={`input input-bordered w-full pl-10 pr-10 ${errors.confirmPassword ? 'input-error' : ''}`}
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    >
-                                        {showConfirmPassword ? (
-                                            <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                        ) : (
-                                            <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                        )}
-                                    </button>
-                                </div>
-                                {errors.confirmPassword && <span className="text-error text-sm">{errors.confirmPassword}</span>}
-                            </div>
-
-                            {/* Terms Checkbox */}
-                            <div className="form-control mt-6">
-                                <label className="label cursor-pointer justify-start gap-2">
-                                    <input type="checkbox" className="checkbox checkbox-sm" required />
-                                    <span className="label-text text-gray-600">
-                                        I agree to the <a href="#" className="text-primary hover:text-secondary">Terms of Service</a> and <a href="#" className="text-primary hover:text-secondary">Privacy Policy</a>
-                                    </span>
-                                </label>
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                className={`btn btn-primary w-full mt-4 ${isLoading ? 'loading' : ''}`}
-                                disabled={isLoading}
-                            >
-                                {!isLoading && 'Create Account'}
-                            </button>
-                        </form>
-
-                        {/* Divider */}
-                        <div className="divider my-6">OR SIGN UP WITH</div>
-
-                        {/* Social Login Buttons */}
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                            <button className="btn btn-outline gap-2">
-                                <FaGoogle className="text-red-500" />
-                            </button>
-                            <button className="btn btn-outline gap-2">
-                                <FaFacebook className="text-blue-600" />
-                            </button>
-                            <button className="btn btn-outline gap-2">
-                                <FaApple />
-                            </button>
-                        </div>
-
-                        {/* Login Link */}
-                        <div className="text-center text-gray-600">
-                            Already have an account?{' '}
-                            <a href="#" className="text-primary hover:text-secondary font-medium">
-                                Sign in
-                            </a>
+                            {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
                         </div>
                     </div>
-                </div>
 
-                {/* App Download Banner */}
-                <div className="mt-8 bg-white rounded-xl shadow-md p-4 flex items-center justify-between">
                     <div>
-                        <h3 className="font-medium text-gray-800">Get the JPaniPaicha app</h3>
-                        <p className="text-sm text-gray-600">Scan to download our mobile app</p>
-                    </div>
-                    <div className="bg-black text-white p-2 rounded">
-                        <div className="grid grid-cols-2 grid-rows-2 gap-1">
-                            <div className="w-2 h-2 bg-white"></div>
-                            <div className="w-2 h-2 bg-white"></div>
-                            <div className="w-2 h-2 bg-white"></div>
-                            <div className="w-2 h-2 bg-white"></div>
+                        <label className="block text-sm font-medium mb-1">Email</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaEnvelope className="text-gray-400" />
+                            </div>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={`w-full pl-10 pr-3 py-2 border rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="your@email.com"
+                            />
                         </div>
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Phone Number</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaPhone className="text-gray-400" />
+                            </div>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handlePhoneChange}
+                                className={`w-full pl-10 pr-3 py-2 border rounded ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="+1234567890"
+                                pattern="[0-9]*"
+                            />
+                        </div>
+                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Password</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaLock className="text-gray-400" />
+                            </div>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className={`w-full pl-10 pr-10 py-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <FaEyeSlash className="text-gray-400" />
+                                ) : (
+                                    <FaEye className="text-gray-400" />
+                                )}
+                            </button>
+                        </div>
+                        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Confirm Password</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaLock className="text-gray-400" />
+                            </div>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                className={`w-full pl-10 pr-10 py-2 border rounded ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                    >
+                        {isLoading ? 'Creating account...' : 'Create Account'}
+                    </button>
+                </form>
+
+                <div className="mt-4 text-center text-sm">
+                    Already have an account?{' '}
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="text-blue-600 hover:underline"
+                    >
+                        Sign in
+                    </button>
                 </div>
             </div>
         </div>
