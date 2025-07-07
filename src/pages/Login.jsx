@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import logo from './../assets/logo.png'; // Adjust the path as necessary
+import logo from './../assets/logo.png';
 import { FaUser, FaLock, FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { HiOutlineMail } from 'react-icons/hi';
 
