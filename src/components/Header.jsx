@@ -4,6 +4,7 @@ import Logo from './../assets/logo.png'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import LogoutButton from './LogoutButton';
 
 const Header = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -11,6 +12,9 @@ const Header = () => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+
 
     // Get products from Redux store
     const { products } = useSelector((state) => state.productStore);
@@ -32,6 +36,12 @@ const Header = () => {
             setSuggestions([]);
             setShowSuggestions(false);
         }
+
+        // Check login state
+        const token = localStorage.getItem('token');
+        setIsLoggedIn(!!token);
+
+
     }, [location.pathname]);
 
     // Handle search input changes
@@ -192,21 +202,28 @@ const Header = () => {
                             </ul>
                         </div>
                         <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-2 sm:mr-4">
-                            <Link
-                                to="/login"
-                                className="btn btn-ghost btn-sm md:btn-md hover:bg-gray-100 transition-colors"
-                            >
-                                <FaUser className="mr-1" />
-                                <span className="hidden sm:inline">Login</span>
-                            </Link>
 
-                            <Link
-                                to="/register"
-                                className="btn btn-outline btn-primary btn-sm md:btn-md hidden sm:flex"
-                            >
-                                <FaUserPlus className="mr-1" />
-                                <span>Register</span>
-                            </Link>
+                            {
+                                !isLoggedIn && (
+                                    <>
+                                        <Link
+                                            to="/login"
+                                            className="btn btn-ghost btn-sm md:btn-md hover:bg-gray-100 transition-colors"
+                                        >
+                                            <FaUser className="mr-1" />
+                                            <span className="hidden sm:inline">Login</span>
+                                        </Link>
+
+                                        <Link
+                                            to="/register"
+                                            className="btn btn-outline btn-primary btn-sm md:btn-md hidden sm:flex"
+                                        >
+                                            <FaUserPlus className="mr-1" />
+                                            <span>Register</span>
+                                        </Link>
+                                    </>
+                                )}
+                            {isLoggedIn && <LogoutButton onLogout={() => setIsLoggedIn(false)} />}
 
                             <div className="indicator">
                                 {uniqueItemCount > 0 && (
