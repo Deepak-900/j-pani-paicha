@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaSearch, FaUser, FaUserPlus, FaShoppingCart } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaSearch, FaUser, FaUserPlus, FaShoppingCart, FaTachometerAlt, FaSignOutAlt } from 'react-icons/fa';
 import Logo from './../assets/logo.png'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux';
@@ -201,30 +201,8 @@ const Header = () => {
                                 <li><Link to={'/faq'}>FAQ</Link></li>
                             </ul>
                         </div>
-                        <div className="navbar-end ml-auto space-x-1 md:space-x-2 mr-2 sm:mr-4">
-
-                            {
-                                !isLoggedIn && (
-                                    <>
-                                        <Link
-                                            to="/login"
-                                            className="btn btn-ghost btn-sm md:btn-md hover:bg-gray-100 transition-colors"
-                                        >
-                                            <FaUser className="mr-1" />
-                                            <span className="hidden sm:inline">Login</span>
-                                        </Link>
-
-                                        <Link
-                                            to="/register"
-                                            className="btn btn-outline btn-primary btn-sm md:btn-md hidden sm:flex"
-                                        >
-                                            <FaUserPlus className="mr-1" />
-                                            <span>Register</span>
-                                        </Link>
-                                    </>
-                                )}
-                            {isLoggedIn && <LogoutButton onLogout={() => setIsLoggedIn(false)} />}
-
+                        <div className="navbar-end ml-auto space-x-4 md:space-x-5 mr-2 sm:mr-4">
+                            {/* Cart button (unchanged) */}
                             <div className="indicator">
                                 {uniqueItemCount > 0 && (
                                     <span className="indicator-item badge badge-primary">{uniqueItemCount}</span>
@@ -235,6 +213,48 @@ const Header = () => {
                                 >
                                     <FaShoppingCart className="text-lg" />
                                 </Link>
+                            </div>
+
+                            {/* User dropdown */}
+                            <div className="dropdown dropdown-end">
+                                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle hover:bg-gray-100 !p-0 w-10 h-10 min-h-0 flex items-center justify-center border border-gray-300">
+                                    {isLoggedIn ? (
+                                        <span className="text-xs md:text-sm">ME</span>
+                                    ) : (
+                                        <FaUser className="text-lg" />
+                                    )}
+                                </div>
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2 ">
+                                    {!isLoggedIn ? (
+                                        <>
+                                            <li>
+                                                <Link to="/login" className="hover:bg-gray-100">
+                                                    <FaUser className="mr-2" />
+                                                    Login
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link to="/register" className="hover:bg-gray-100">
+                                                    <FaUserPlus className="mr-2" />
+                                                    Register
+                                                </Link>
+                                            </li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li>
+                                                <Link to="/dashboard" className="hover:bg-gray-100">
+                                                    <FaTachometerAlt className="mr-2" />
+                                                    Dashboard
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <LogoutButton onLogout={() => setIsLoggedIn(false)} />
+
+                                            </li>
+                                        </>
+                                    )}
+                                </ul>
                             </div>
                         </div>
                     </div>

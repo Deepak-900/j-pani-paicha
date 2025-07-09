@@ -258,7 +258,7 @@ const Register = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         className={`w-full pl-10 pr-10 py-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-                                        placeholder="••••••••"
+                                        placeholder="********"
                                     />
                                     <button
                                         type="button"
@@ -287,7 +287,7 @@ const Register = () => {
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         className={`w-full pl-10 pr-10 py-2 border rounded ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
-                                        placeholder="••••••••"
+                                        placeholder="********"
                                     />
                                 </div>
                                 {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}

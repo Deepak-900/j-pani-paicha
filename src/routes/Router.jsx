@@ -10,7 +10,8 @@ import Register from '../pages/Register'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/Cart'
 import Shop from '../pages/Shop'
-import Dashboard from '../pages/dashboard/Dashboard'
+import DashboardLayout from '../pages/dashboard/DashboardLayout'
+import DashboardHome from '../pages/dashboard/pages/DashboardHome'
 
 const Router = () => {
     return (
@@ -26,8 +27,9 @@ const Router = () => {
                     <Route path='login' element={<Login />} />
                     <Route path='register' element={<Register />} />
                     <Route path='cart' element={<Cart />} />
-                    <Route path='dashboard' element={<Dashboard />} />
-
+                </Route>
+                <Route element={<DashboardLayout />} >
+                    <Route path='dashboard' element={<DashboardHome />} />
                 </Route>
             </Routes>
         </BrowserRouter >

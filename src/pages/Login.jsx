@@ -2,6 +2,7 @@ import { useState } from 'react';
 import logo from './../assets/logo.png';
 import { FaUser, FaLock, FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { HiOutlineMail } from 'react-icons/hi';
+import { Link } from 'react-router-dom';
 
 
 const LoginPage = () => {
@@ -137,9 +138,9 @@ const LoginPage = () => {
                         {/* Sign Up Link */}
                         <div className="text-center text-gray-600">
                             Don't have an account?{' '}
-                            <a href="#" className="text-primary hover:text-secondary font-medium">
+                            <Link to={'/register'} className="text-primary hover:text-secondary font-medium">
                                 Sign up
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -160,7 +161,7 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
