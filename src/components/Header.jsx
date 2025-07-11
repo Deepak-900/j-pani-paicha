@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
+import axios from 'axios';
 
 const Header = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +15,7 @@ const Header = () => {
     const location = useLocation();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [userData, setUserData] = useState(null);
 
 
     // Get products from Redux store
@@ -37,12 +39,52 @@ const Header = () => {
             setShowSuggestions(false);
         }
 
-        // Check login state
-        const token = localStorage.getItem('token');
-        setIsLoggedIn(!!token);
+        const checkAuthStatus = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/auth/check-auth', {
+                    withCredentials: true, // Important for cookies
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    params: {
+                        t: Date.now() // Add timestamp to bust cache
+                    }
+                });
+                console.log('Auth check response:', response.data);
 
+                if (response.data.isAuthenticated) {
+                    setIsLoggedIn(true);
+                    setUserData(response.data.user);
+                } else {
+                    setIsLoggedIn(false);
+                    setUserData(null);
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                setIsLoggedIn(false);
+                setUserData(null);
+            }
+        };
+        checkAuthStatus();
 
     }, [location.pathname]);
+
+
+    // Handle logout
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:5000/api/auth/logout', {}, {
+                withCredentials: true
+            });
+
+            setIsLoggedIn(false);
+            setUserData(null);
+            navigate('/');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
 
     // Handle search input changes
     const handleSearchChange = (e) => {
@@ -225,7 +267,21 @@ const Header = () => {
                                     )}
                                 </div>
                                 <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2 ">
-                                    {!isLoggedIn ? (
+                                    {isLoggedIn ? (
+                                        <>
+                                            <li>
+                                                <Link to="/dashboard" className="hover:bg-gray-100">
+                                                    <FaTachometerAlt className="mr-2" />
+                                                    Dashboard
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <LogoutButton onLogout={handleLogout} />
+
+                                            </li>
+                                        </>
+
+                                    ) : (
                                         <>
                                             <li>
                                                 <Link to="/login" className="hover:bg-gray-100">
@@ -238,19 +294,6 @@ const Header = () => {
                                                     <FaUserPlus className="mr-2" />
                                                     Register
                                                 </Link>
-                                            </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li>
-                                                <Link to="/dashboard" className="hover:bg-gray-100">
-                                                    <FaTachometerAlt className="mr-2" />
-                                                    Dashboard
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <LogoutButton onLogout={() => setIsLoggedIn(false)} />
-
                                             </li>
                                         </>
                                     )}

@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import logo from './../assets/logo.png';
 import { FaUser, FaLock, FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { HiOutlineMail } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
-
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -11,15 +13,39 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate login API call
-        setTimeout(() => {
+        setError('');
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                email,
+                password
+            }, {
+                withCredentials: true // Important for cookies
+            });
+
+            if (response.data.success) {
+                toast.success('Login successful!');
+                // Store user data in context/state if needed
+                // Then redirect to dashboard or home page
+                navigate('/dashboard');
+            } else {
+                setError(response.data.message || 'Login failed');
+            }
+        } catch (err) {
+            const errorMessage = err.response?.data?.message ||
+                err.message ||
+                'Login failed. Please try again.';
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
             setIsLoading(false);
-            // Handle login logic here
-        }, 1500);
+        }
     };
 
     return (
@@ -41,6 +67,16 @@ const LoginPage = () => {
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
                             <p className="text-gray-600">Sign in to your JPaniPaicha account</p>
                         </div>
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="alert alert-error mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{error}</span>
+                            </div>
+                        )}
 
                         {/* Login Form */}
                         <form onSubmit={handleSubmit} className="space-y-5">
@@ -80,6 +116,7 @@ const LoginPage = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
+                                        minLength="8"
                                     />
                                     <button
                                         type="button"
@@ -103,9 +140,9 @@ const LoginPage = () => {
                                         />
                                         <span className="label-text text-gray-600">Remember me</span>
                                     </label>
-                                    <a href="#" className="text-sm text-primary hover:text-secondary">
+                                    <Link to="/forgot-password" className="text-sm text-primary hover:text-secondary">
                                         Forgot password?
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
 
@@ -115,7 +152,7 @@ const LoginPage = () => {
                                 className={`btn btn-primary w-full ${isLoading ? 'loading' : ''}`}
                                 disabled={isLoading}
                             >
-                                {!isLoading && 'Sign In'}
+                                {!isLoading ? 'Sign In' : 'Signing In...'}
                             </button>
                         </form>
 
@@ -124,13 +161,21 @@ const LoginPage = () => {
 
                         {/* Social Login Buttons */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
-                            <button className="btn btn-outline gap-2">
+                            <button
+                                type="button"
+                                className="btn btn-outline gap-2"
+                                onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+                            >
                                 <FaGoogle className="text-red-500" />
                             </button>
-                            <button className="btn btn-outline gap-2">
+                            <button
+                                type="button"
+                                className="btn btn-outline gap-2"
+                                onClick={() => window.location.href = 'http://localhost:5000/api/auth/facebook'}
+                            >
                                 <FaFacebook className="text-blue-600" />
                             </button>
-                            <button className="btn btn-outline gap-2">
+                            <button type="button" className="btn btn-outline gap-2">
                                 <FaApple />
                             </button>
                         </div>
@@ -161,7 +206,7 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

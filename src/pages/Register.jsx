@@ -3,13 +3,14 @@ import axios from 'axios';
 import logo from './../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const Register = () => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
-        phone: '',
+        phoneNumber: '',
         password: '',
         confirmPassword: ''
     });
@@ -56,12 +57,12 @@ const Register = () => {
 
         setFormData(prev => ({
             ...prev,
-            phone: numbersOnly
+            phoneNumber: numbersOnly
         }));
 
         // Clear error when user types
-        if (errors.phone) {
-            setErrors(prev => ({ ...prev, phone: '' }));
+        if (errors.phoneNumber) {
+            setErrors(prev => ({ ...prev, phoneNumber: '' }));
         }
     };
 
@@ -93,11 +94,11 @@ const Register = () => {
             isValid = false;
         }
 
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone number is required';
+        if (!formData.phoneNumber.trim()) {
+            newErrors.phoneNumber = 'Phone number is required';
             isValid = false;
-        } else if (!/^\d{10}$/.test(formData.phone)) {
-            newErrors.phone = 'Phone number must be exactly 10 digits';
+        } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+            newErrors.phoneNumber = 'Phone number must be exactly 10 digits';
             isValid = false;
         }
 
@@ -128,14 +129,37 @@ const Register = () => {
 
         try {
             const { confirmPassword, ...userData } = formData;
-            const response = await axios.post('http://localhost:5000/api/v1/auth/register', userData);
+            const response = await axios.post('http://localhost:5000/api/auth/register', userData);
 
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                navigate('/dashboard');
+
+            // Check for successful response (2xx status)
+            if (response.status >= 200 && response.status < 300) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registration Successful',
+                    text: 'You can now login to your account',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    navigate('/login');
+                });
+            } else {
+                // Handle non-2xx responses that don't throw errors
+                throw new Error(response.data?.message || 'Registration failed');
             }
         } catch (error) {
-            setApiError(error.response?.data?.message || 'Registration failed. Please try again.');
+            console.error('Registration error:', error);
+            const errorMessage = error.response?.data?.message ||
+                error.message ||
+                'Registration failed. Please try again.';
+            setApiError(errorMessage);
+
+            // Show error alert
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                text: errorMessage,
+                confirmButtonText: 'OK'
+            });
         } finally {
             setIsLoading(false);
         }
@@ -236,14 +260,14 @@ const Register = () => {
                                     <input
                                         type="tel"
                                         name="phone"
-                                        value={formData.phone}
+                                        value={formData.phoneNumber}
                                         onChange={handlePhoneChange}
-                                        className={`w-full pl-10 pr-3 py-2 border rounded ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                        className={`w-full pl-10 pr-3 py-2 border rounded ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'}`}
                                         placeholder="+977-98********"
                                         pattern="[0-9]*"
                                     />
                                 </div>
-                                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
                             </div>
 
                             <div>
