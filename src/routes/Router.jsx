@@ -12,6 +12,7 @@ import Cart from '../pages/Cart'
 import Shop from '../pages/Shop'
 import DashboardLayout from '../pages/dashboard/DashboardLayout'
 import DashboardHome from '../pages/dashboard/pages/DashboardHome'
+import ProtectedRoute from '../components/ProtectedRoute'
 
 const Router = () => {
     return (
@@ -28,8 +29,10 @@ const Router = () => {
                     <Route path='register' element={<Register />} />
                     <Route path='cart' element={<Cart />} />
                 </Route>
-                <Route element={<DashboardLayout />} >
-                    <Route path='dashboard' element={<DashboardHome />} />
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<DashboardLayout />} >
+                        <Route path='dashboard' element={<DashboardHome />} />
+                    </Route>
                 </Route>
             </Routes>
         </BrowserRouter >

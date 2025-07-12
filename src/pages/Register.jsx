@@ -267,7 +267,7 @@ const Register = () => {
                                         pattern="[0-9]*"
                                     />
                                 </div>
-                                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
+                                {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
                             </div>
 
                             <div>
