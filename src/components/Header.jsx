@@ -9,7 +9,8 @@ import {
     FaUserPlus,
     FaShoppingCart,
     FaTachometerAlt,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaUserCog
 } from 'react-icons/fa';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -18,7 +19,7 @@ import Logo from '../assets/logo.png';
 
 const Header = () => {
     // Auth state from context
-    const { isLoggedIn, user, logout, isLoading } = useAuth();
+    const { isLoggedIn, userData, logout, isLoading } = useAuth();
 
     // Component state
     const [searchTerm, setSearchTerm] = useState('');
@@ -263,49 +264,117 @@ const Header = () => {
                             </Link>
                         </div>
 
-                        {/* User Dropdown */}
+                        {/* Modern User Dropdown */}
                         <div className="dropdown dropdown-end">
                             <div
                                 tabIndex={0}
                                 role="button"
-                                className="btn btn-ghost btn-circle hover:bg-gray-100 !p-0 w-10 h-10 min-h-0 flex items-center justify-center border border-gray-300"
+                                className="btn btn-ghost btn-circle avatar hover:bg-gray-100/50 !p-0 w-9 h-9 min-h-0 flex items-center justify-center border border-gray-200/50 overflow-hidden transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
                                 aria-label="User menu"
                             >
                                 {isLoggedIn ? (
-                                    <span className="text-xs md:text-sm">
-                                        {user?.name?.charAt(0) || 'ME'}
-                                    </span>
+                                    userData?.profilePicture ? (
+                                        <img
+                                            src={`${import.meta.env.VITE_API_BASE_URL}/userProfile/${userData.profilePicture}`}
+                                            alt="Profile"
+                                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = `${import.meta.env.VITE_API_BASE_URL}/images/default.png`;
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative">
+                                            <FaUser className="text-gray-500 text-opacity-80 text-[0.9rem] absolute transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2" />
+                                        </div>
+                                    )
                                 ) : (
-                                    <FaUser className="text-lg" />
+                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
+                                        <FaUser className="text-gray-500 text-[0.9rem] absolute transform -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2" />
+                                    </div>
                                 )}
                             </div>
-                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
+
+                            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-white rounded-xl w-56 mt-3 border border-gray-100">
                                 {isLoggedIn ? (
                                     <>
+                                        {/* User Profile Section */}
+                                        <li className="px-0 py-3 border-b border-gray-100">
+                                            <div className="flex items-center gap-3">
+                                                <div className="avatar w-9 h-9 rounded-full overflow-hidden border border-gray-200">
+                                                    {userData?.profilePicture ? (
+                                                        <img
+                                                            src={`${import.meta.env.VITE_API_BASE_URL}/userProfile/${userData.profilePicture}`}
+                                                            alt="Profile"
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = `${import.meta.env.VITE_API_BASE_URL}/images/default.png`;
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                                                            <FaUser className="text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-sm truncate">
+                                                        {userData?.firstName} {userData?.lastName}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate">
+                                                        {userData?.role || 'Member'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        {/* Menu Items */}
                                         <li>
-                                            <Link to="/dashboard" className="hover:bg-gray-100">
-                                                <FaTachometerAlt className="mr-2" />
+                                            <Link
+                                                to="/dashboard"
+                                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-lg transition-colors"
+                                            >
+                                                <FaTachometerAlt className="text-gray-500 text-opacity-80" />
                                                 Dashboard
                                             </Link>
                                         </li>
                                         <li>
-                                            <button onClick={handleLogout} className="hover:bg-gray-100">
-                                                <FaSignOutAlt className="mr-2" />
-                                                Logout
+                                            <Link
+                                                to="/settings"
+                                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-lg transition-colors"
+                                            >
+                                                <FaUserCog className="text-gray-500 text-opacity-80" />
+                                                Settings
+                                            </Link>
+                                        </li>
+                                        <li className="border-t border-gray-100 mt-1">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-lg transition-colors w-full text-left text-red-500 hover:text-red-600"
+                                            >
+                                                <FaSignOutAlt />
+                                                Sign Out
                                             </button>
                                         </li>
                                     </>
                                 ) : (
                                     <>
                                         <li>
-                                            <Link to="/login" className="hover:bg-gray-100">
-                                                <FaUser className="mr-2" />
+                                            <Link
+                                                to="/login"
+                                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-lg transition-colors"
+                                            >
+                                                <FaUser className="text-gray-500 text-opacity-80" />
                                                 Login
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link to="/register" className="hover:bg-gray-100">
-                                                <FaUserPlus className="mr-2" />
+                                            <Link
+                                                to="/register"
+                                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-lg transition-colors"
+                                            >
+                                                <FaUserPlus className="text-gray-500 text-opacity-80" />
                                                 Register
                                             </Link>
                                         </li>
@@ -316,7 +385,7 @@ const Header = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

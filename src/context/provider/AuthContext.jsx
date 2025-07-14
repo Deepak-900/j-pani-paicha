@@ -5,7 +5,9 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userData, setUserData] = useState(null);
+    const [userData, setUserData] = useState({
+
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -18,6 +20,8 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const response = await api.get('/api/auth/check-auth');
+
+            console.log(response.data.user)
 
             if (response.data.isAuthenticated) {
                 setIsLoggedIn(true);
@@ -52,25 +56,36 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const response = await api.post('/api/auth/login', credentials);
+            const response = await api.post('/api/auth/login', credentials, {
+                withCredentials: true // Ensure cookies are handled
+            });
+
             if (response.data.success) {
+                // Immediate state updates before any UI changes
                 setIsLoggedIn(true);
                 setUserData(response.data.user);
                 setError(null);
-                toast.success('Login successful!', {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                });
-                return true;
+
+                // Return both success status and user data
+                return {
+                    success: true,
+                    user: response.data.user
+                };
+            } else {
+                // Handle API-reported failure
+                return {
+                    success: false,
+                    message: response.data.message || 'Login failed'
+                };
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed');
-            return false;
+            // Handle network/validation errors
+            const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
+            setError(errorMessage);
+            return {
+                success: false,
+                message: errorMessage
+            };
         }
     };
 

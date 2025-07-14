@@ -1,26 +1,23 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-    FiHome,
-    FiPackage,
-    FiShoppingCart,
-    FiUsers,
-    FiSettings,
-    FiChevronDown,
-    FiChevronUp,
-    FiX,
-    FiChevronLeft,
-    FiChevronRight
+    FiHome, FiPackage, FiShoppingCart, FiUsers,
+    FiSettings, FiChevronDown, FiChevronUp,
+    FiX, FiChevronLeft, FiChevronRight, FiLogOut
 } from 'react-icons/fi';
 import Logo from '../../assets/logo.png';
+import { useAuth } from '../../context/provider/AuthContext';
 
 const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
+    const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [expandedMenu, setExpandedMenu] = useState(null);
     const [hoveredItem, setHoveredItem] = useState(null);
     const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
     const location = useLocation();
     const sidebarRef = useRef(null);
+
+    const { userData, logout } = useAuth();
 
     const navItems = useMemo(() => [
         {
@@ -68,7 +65,16 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
             icon: FiSettings,
             label: "Settings",
         },
-    ], []);
+        {
+            id: 'signout',
+            icon: FiLogOut,
+            label: "Sign Out",
+            action: async () => {
+                await logout();
+                navigate('/login');
+            }
+        },
+    ], [logout, navigate]);
 
     useEffect(() => {
         setExpandedMenu(null);
@@ -79,7 +85,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
         if (collapsed) return;
 
         const activeMenu = navItems.find(item =>
-            item.dropdownItems && item.dropdownItems.some(subItem =>
+            item.dropdownItems?.some(subItem =>
                 location.pathname.startsWith(subItem.to)
             )
         );
@@ -99,14 +105,8 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
 
     const handleItemHover = (itemId, event) => {
         if (!collapsed) return;
-
-        const itemElement = event.currentTarget;
-        const rect = itemElement.getBoundingClientRect();
-
-        setPopupPosition({
-            top: rect.top,
-            left: rect.right + 8
-        });
+        const rect = event.currentTarget.getBoundingClientRect();
+        setPopupPosition({ top: rect.top, left: rect.right + 8 });
         setHoveredItem(itemId);
     };
 
@@ -118,21 +118,154 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
         setHoveredItem(null);
     };
 
-    const getCollapseIcon = () => {
-        if (isMobile) {
-            return <FiX size={20} />;
+    const renderNavItem = (item) => {
+        const isActive = location.pathname === item.to ||
+            (item.dropdownItems?.some(sub => location.pathname.startsWith(sub.to)));
+
+        if (item.id === 'signout') {
+            return (
+                <li key={item.id} className="relative group">
+                    <button
+                        onClick={item.action}
+                        onMouseEnter={(e) => handleItemHover(item.id, e)}
+                        onMouseLeave={() => !collapsed && setHoveredItem(null)}
+                        className={`flex items-center w-full p-3 rounded-lg transition-colors duration-200
+              hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
+                    >
+                        <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
+                        {!collapsed && <span className="font-medium">{item.label}</span>}
+                    </button>
+
+                    {collapsed && hoveredItem === item.id && (
+                        <div className="fixed z-50 shadow-xl rounded-lg bg-white border border-gray-200 min-w-[200px]"
+                            style={{ top: `${popupPosition.top}px`, left: `${popupPosition.left}px` }}
+                            onMouseEnter={handlePopupMouseEnter}
+                            onMouseLeave={handlePopupMouseLeave}>
+                            <button onClick={item.action}
+                                className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50">
+                                <item.icon className="w-4 h-4 mr-3" />
+                                {item.label}
+                            </button>
+                        </div>
+                    )}
+                </li>
+            );
         }
-        return collapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />;
+
+        return (
+            <li key={item.id} className="relative group">
+                {item.dropdownItems ? (
+                    <>
+                        <button
+                            onClick={() => !collapsed && toggleMenu(item.id)}
+                            onMouseEnter={(e) => handleItemHover(item.id, e)}
+                            onMouseLeave={() => !collapsed && setHoveredItem(null)}
+                            className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200
+                ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
+                ${collapsed ? 'justify-center' : ''}`}
+                        >
+                            <div className="flex items-center">
+                                <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
+                                {!collapsed && <span className="font-medium">{item.label}</span>}
+                            </div>
+                            {!collapsed && item.dropdownItems &&
+                                (expandedMenu === item.id ? <FiChevronUp /> : <FiChevronDown />)}
+                        </button>
+
+                        {!collapsed && expandedMenu === item.id && (
+                            <ul className="ml-8 mt-1 space-y-1">
+                                {item.dropdownItems.map(subItem => {
+                                    const IconComponent = subItem.icon;
+                                    return (
+                                        <li key={subItem.to}>
+                                            <Link
+                                                to={subItem.to}
+                                                className={`flex items-center px-3 py-2 rounded-lg text-sm
+                          ${location.pathname.startsWith(subItem.to) ?
+                                                        'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
+                                                onClick={isMobile ? onClose : undefined}
+                                            >
+                                                <IconComponent className="w-4 h-4 mr-3" />
+                                                {subItem.label}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                    </>
+                ) : (
+                    <Link
+                        to={item.to}
+                        onMouseEnter={(e) => handleItemHover(item.id, e)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        className={`flex items-center p-3 rounded-lg transition-colors duration-200
+              ${location.pathname === item.to ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
+              ${collapsed ? 'justify-center' : ''}`}
+                        onClick={isMobile ? onClose : undefined}
+                    >
+                        <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
+                        {!collapsed && <span className="font-medium">{item.label}</span>}
+                    </Link>
+                )}
+
+                {collapsed && hoveredItem === item.id && item.id !== 'signout' && (
+                    <div className="fixed z-50 shadow-xl rounded-lg bg-white border border-gray-200 min-w-[200px]"
+                        style={{ top: `${popupPosition.top}px`, left: `${popupPosition.left}px` }}
+                        onMouseEnter={handlePopupMouseEnter}
+                        onMouseLeave={handlePopupMouseLeave}>
+                        <div className="py-2">
+                            {item.dropdownItems ? (
+                                <>
+                                    <div className="px-4 py-2 font-medium border-b border-gray-100">
+                                        {item.label}
+                                    </div>
+                                    <ul className="py-1">
+                                        {item.dropdownItems.map(subItem => {
+                                            const IconComponent = subItem.icon;
+                                            return (
+                                                <li key={subItem.to}>
+                                                    <Link
+                                                        to={subItem.to}
+                                                        className={`flex items-center px-4 py-2 text-sm
+                              ${location.pathname.startsWith(subItem.to) ?
+                                                                'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
+                                                        onClick={onClose}
+                                                    >
+                                                        <IconComponent className="w-4 h-4 mr-3" />
+                                                        {subItem.label}
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </>
+                            ) : (
+                                <Link
+                                    to={item.to}
+                                    className={`flex items-center px-4 py-2 text-sm
+                    ${location.pathname === item.to ?
+                                            'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
+                                    onClick={onClose}
+                                >
+                                    <item.icon className="w-4 h-4 mr-3" />
+                                    {item.label}
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </li>
+        );
     };
 
     return (
         <aside
             ref={sidebarRef}
             className={`bg-white border-r border-gray-200 h-full flex flex-col transition-all duration-300 ease-in-out
-                ${isMobile ? `fixed top-0 left-0 z-30 w-64 h-full ${isOpen ? 'translate-x-0' : '-translate-x-full'}` :
+        ${isMobile ? `fixed top-0 left-0 z-30 w-64 h-full ${isOpen ? 'translate-x-0' : '-translate-x-full'}` :
                     `relative ${collapsed ? 'w-16' : 'w-64'}`}`}
         >
-            {/* Header with updated logo and button positioning */}
             <div className={`p-4 border-b border-gray-200 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
                 <div className="flex items-center gap-2 relative">
                     <div className={`flex items-center justify-center ${collapsed ? 'mx-auto' : ''}`}>
@@ -163,7 +296,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                 {!isMobile && collapsed && (
                     <button
                         onClick={toggleCollapse}
-                        className="absolute left-16 py-1 border border-gray-200 border-l-0 rounded-r-md  bg-white hover:bg-gray-100 flex-shrink-0 z-10"
+                        className="absolute left-16 py-1 border border-gray-200 border-l-0 rounded-r-md bg-white hover:bg-gray-100 flex-shrink-0 z-10"
                     >
                         <FiChevronRight size={20} />
                     </button>
@@ -179,134 +312,42 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                 )}
             </div>
 
-            {/* Navigation - keep existing */}
             <nav className="flex-1 overflow-y-auto p-3">
                 <ul className="space-y-1">
-                    {navItems.map((item) => {
-                        const isActive = location.pathname === item.to ||
-                            (item.dropdownItems?.some(sub => location.pathname.startsWith(sub.to)));
-
-                        const ItemButton = (
-                            <button
-                                onClick={() => !collapsed && toggleMenu(item.id)}
-                                onMouseEnter={(e) => handleItemHover(item.id, e)}
-                                onMouseLeave={() => !collapsed && setHoveredItem(null)}
-                                className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200
-                                    ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
-                                    ${collapsed ? 'justify-center' : ''}`}
-                            >
-                                <div className="flex items-center">
-                                    <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
-                                    {!collapsed && <span className="font-medium">{item.label}</span>}
-                                </div>
-                                {!collapsed && item.dropdownItems && (expandedMenu === item.id ? <FiChevronUp /> : <FiChevronDown />)}
-                            </button>
-                        );
-
-                        return (
-                            <li
-                                key={item.id}
-                                className="relative group"
-                                onMouseEnter={() => !collapsed && setHoveredItem(item.id)}
-                                onMouseLeave={() => !collapsed && setHoveredItem(null)}
-                            >
-                                {item.dropdownItems ? (
-                                    <>
-                                        {ItemButton}
-                                        {!collapsed && expandedMenu === item.id && (
-                                            <ul className="ml-8 mt-1 space-y-1">
-                                                {item.dropdownItems.map(subItem => (
-                                                    <li key={subItem.to}>
-                                                        <Link
-                                                            to={subItem.to}
-                                                            className={`flex items-center px-3 py-2 rounded-lg text-sm
-                                                                ${location.pathname.startsWith(subItem.to) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                                            onClick={isMobile ? onClose : undefined}
-                                                        >
-                                                            <subItem.icon className="w-4 h-4 mr-3" />
-                                                            {subItem.label}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </>
-                                ) : (
-                                    <Link
-                                        to={item.to}
-                                        onMouseEnter={(e) => handleItemHover(item.id, e)}
-                                        onMouseLeave={() => setHoveredItem(null)}
-                                        className={`flex items-center p-3 rounded-lg transition-colors duration-200
-                                            ${location.pathname === item.to ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
-                                            ${collapsed ? 'justify-center' : ''}`}
-                                        onClick={isMobile ? onClose : undefined}
-                                    >
-                                        <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
-                                        {!collapsed && <span className="font-medium">{item.label}</span>}
-                                    </Link>
-                                )}
-
-                                {/* Hover Popup for collapsed sidebar */}
-                                {collapsed && hoveredItem === item.id && (
-                                    <div
-                                        className="fixed z-50 shadow-xl rounded-lg bg-white border border-gray-200 min-w-[200px]"
-                                        style={{
-                                            top: `${popupPosition.top}px`,
-                                            left: `${popupPosition.left}px`
-                                        }}
-                                        onMouseEnter={handlePopupMouseEnter}
-                                        onMouseLeave={handlePopupMouseLeave}
-                                    >
-                                        <div className="py-2">
-                                            {item.dropdownItems ? (
-                                                <>
-                                                    <div className="px-4 py-2 font-medium border-b border-gray-100">
-                                                        {item.label}
-                                                    </div>
-                                                    <ul className="py-1">
-                                                        {item.dropdownItems.map(subItem => (
-                                                            <li key={subItem.to}>
-                                                                <Link
-                                                                    to={subItem.to}
-                                                                    className={`flex items-center px-4 py-2 text-sm
-                                                                        ${location.pathname.startsWith(subItem.to) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                                                    onClick={onClose}
-                                                                >
-                                                                    <subItem.icon className="w-4 h-4 mr-3" />
-                                                                    {subItem.label}
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </>
-                                            ) : (
-                                                <Link
-                                                    to={item.to}
-                                                    className={`flex items-center px-4 py-2 text-sm
-                                                        ${location.pathname === item.to ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                                    onClick={onClose}
-                                                >
-                                                    <item.icon className="w-4 h-4 mr-3" />
-                                                    {item.label}
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </li>
-                        );
-                    })}
+                    {navItems.map(renderNavItem)}
                 </ul>
             </nav>
 
-            {/* Footer */}
             <div className={`p-4 border-t border-gray-200 ${collapsed ? 'px-3' : ''}`}>
                 <div className="flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <div className="relative w-8 h-8 flex-shrink-0">
+                        {userData?.profilePicture ? (
+                            <img
+                                src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/${userData.profilePicture || 'default.png'}`}
+                                alt="Profile"
+                                className="w-full h-full rounded-full object-cover"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/default.png`;
+                                    e.target.className = 'w-full h-full rounded-full bg-gray-300';
+                                }}
+                            />
+                        ) : (
+                            <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                                {userData?.firstName?.charAt(0) || userData?.email?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                        )}
+                    </div>
+
                     {!collapsed && (
-                        <div className="ml-3">
-                            <p className="font-medium truncate">Admin User</p>
-                            <p className="text-xs text-gray-500 truncate">Administrator</p>
+                        <div className="ml-3 overflow-hidden">
+                            <p className="font-medium truncate">
+                                {userData?.firstName || userData?.email || 'User'}
+                                {userData?.lastName && ` ${userData.lastName}`}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate capitalize">
+                                {userData?.role || 'Guest'}
+                            </p>
                         </div>
                     )}
                 </div>

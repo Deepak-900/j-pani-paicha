@@ -81,14 +81,18 @@ const LoginPage = () => {
         }
 
         try {
-            const { success, message } = await login({ email, password, rememberMe });
+            const { success, message } = await login({ email, password });
 
-            if (success) {
-                toast.success('Login successful!');
-                navigate(from, { replace: true });
-            } else {
-                setError(message || 'Invalid Credential. Please try again.');
+            if (!success) {
+                setError(message || 'Invalid credentials');
+                return;
             }
+
+            // Success case - ensure all states are updated before redirect
+            await new Promise(resolve => setTimeout(resolve, 50)); // Small delay for state propagation
+            toast.success('Login successful!');
+            navigate(from, { replace: true });
+
         } catch (err) {
             const errorMessage = err.response?.data?.message ||
                 err.message ||
