@@ -13,6 +13,7 @@ import Shop from '../pages/Shop'
 import DashboardLayout from '../pages/dashboard/DashboardLayout'
 import DashboardHome from '../pages/dashboard/pages/DashboardHome'
 import ProtectedRoute from '../components/ProtectedRoute'
+import UserProfile from '../pages/dashboard/pages/UserProfile'
 
 const Router = () => {
     return (
@@ -32,6 +33,7 @@ const Router = () => {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<DashboardLayout />} >
                         <Route path='dashboard' element={<DashboardHome />} />
+                        <Route path='userProfile' element={<UserProfile />} />
                     </Route>
                 </Route>
             </Routes>

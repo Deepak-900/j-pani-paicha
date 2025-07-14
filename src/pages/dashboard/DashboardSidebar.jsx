@@ -3,8 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     FiHome, FiPackage, FiShoppingCart, FiUsers,
     FiSettings, FiChevronDown, FiChevronUp,
-    FiX, FiChevronLeft, FiChevronRight, FiLogOut
+    FiX, FiChevronLeft, FiChevronRight, FiLogOut,
+    FiUser, FiHeart, FiCreditCard, FiMapPin
 } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import Logo from '../../assets/logo.png';
 import { useAuth } from '../../context/provider/AuthContext';
 
@@ -19,7 +21,8 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
 
     const { userData, logout } = useAuth();
 
-    const navItems = useMemo(() => [
+    // Admin navigation items
+    const adminNavItems = useMemo(() => [
         {
             id: 'home',
             to: "/dashboard",
@@ -64,6 +67,45 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
             to: "/dashboard/settings",
             icon: FiSettings,
             label: "Settings",
+
+        }
+    ], []);
+
+    // Customer navigation items
+    const customerNavItems = useMemo(() => [
+        {
+            id: 'orders',
+            to: "/dashboard/my-orders",
+            icon: FiShoppingCart,
+            label: "My Orders",
+        },
+        {
+            id: 'wishlist',
+            to: "/dashboard/wishlist",
+            icon: FiHeart,
+            label: "Wishlist",
+        },
+        {
+            id: 'addresses',
+            to: "/dashboard/addresses",
+            icon: FiMapPin,
+            label: "Addresses",
+        },
+        {
+            id: 'payments',
+            to: "/dashboard/payment-methods",
+            icon: FiCreditCard,
+            label: "Payment Methods",
+        }
+    ], []);
+
+    // Common items (like logout)
+    const commonNavItems = useMemo(() => [
+        {
+            id: 'account',
+            to: "/userProfile",
+            icon: FiUser,
+            label: "My Account",
         },
         {
             id: 'signout',
@@ -73,8 +115,17 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                 await logout();
                 navigate('/login');
             }
-        },
+        }
     ], [logout, navigate]);
+
+    // Determine which nav items to show based on user role
+    const navItems = useMemo(() => {
+        const isAdmin = userData?.role === 'admin';
+        return [
+            ...(isAdmin ? adminNavItems : customerNavItems),
+            ...commonNavItems
+        ];
+    }, [userData?.role, adminNavItems, customerNavItems, commonNavItems]);
 
     useEffect(() => {
         setExpandedMenu(null);
@@ -130,10 +181,22 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                         onMouseEnter={(e) => handleItemHover(item.id, e)}
                         onMouseLeave={() => !collapsed && setHoveredItem(null)}
                         className={`flex items-center w-full p-3 rounded-lg transition-colors duration-200
-              hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
+                            hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
                     >
                         <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
-                        {!collapsed && <span className="font-medium">{item.label}</span>}
+                        {!collapsed && (
+                            <motion.span
+                                className="font-medium"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{
+                                    opacity: collapsed ? 0 : 1,
+                                    x: collapsed ? -10 : 0
+                                }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {item.label}
+                            </motion.span>
+                        )}
                     </button>
 
                     {collapsed && hoveredItem === item.id && (
@@ -161,19 +224,37 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                             onMouseEnter={(e) => handleItemHover(item.id, e)}
                             onMouseLeave={() => !collapsed && setHoveredItem(null)}
                             className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200
-                ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
-                ${collapsed ? 'justify-center' : ''}`}
+                                ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
+                                ${collapsed ? 'justify-center' : ''}`}
                         >
                             <div className="flex items-center">
                                 <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
-                                {!collapsed && <span className="font-medium">{item.label}</span>}
+                                {!collapsed && (
+                                    <motion.span
+                                        className="font-medium"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{
+                                            opacity: collapsed ? 0 : 1,
+                                            x: collapsed ? -10 : 0
+                                        }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
                             </div>
                             {!collapsed && item.dropdownItems &&
                                 (expandedMenu === item.id ? <FiChevronUp /> : <FiChevronDown />)}
                         </button>
 
                         {!collapsed && expandedMenu === item.id && (
-                            <ul className="ml-8 mt-1 space-y-1">
+                            <motion.ul
+                                className="ml-8 mt-1 space-y-1"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
                                 {item.dropdownItems.map(subItem => {
                                     const IconComponent = subItem.icon;
                                     return (
@@ -181,7 +262,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                                             <Link
                                                 to={subItem.to}
                                                 className={`flex items-center px-3 py-2 rounded-lg text-sm
-                          ${location.pathname.startsWith(subItem.to) ?
+                                                    ${location.pathname.startsWith(subItem.to) ?
                                                         'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
                                                 onClick={isMobile ? onClose : undefined}
                                             >
@@ -191,7 +272,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                                         </li>
                                     );
                                 })}
-                            </ul>
+                            </motion.ul>
                         )}
                     </>
                 ) : (
@@ -200,12 +281,24 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                         onMouseEnter={(e) => handleItemHover(item.id, e)}
                         onMouseLeave={() => setHoveredItem(null)}
                         className={`flex items-center p-3 rounded-lg transition-colors duration-200
-              ${location.pathname === item.to ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
-              ${collapsed ? 'justify-center' : ''}`}
+                            ${location.pathname === item.to ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}
+                            ${collapsed ? 'justify-center' : ''}`}
                         onClick={isMobile ? onClose : undefined}
                     >
                         <item.icon className={`text-lg ${collapsed ? '' : 'mr-3'}`} />
-                        {!collapsed && <span className="font-medium">{item.label}</span>}
+                        {!collapsed && (
+                            <motion.span
+                                className="font-medium"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{
+                                    opacity: collapsed ? 0 : 1,
+                                    x: collapsed ? -10 : 0
+                                }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {item.label}
+                            </motion.span>
+                        )}
                     </Link>
                 )}
 
@@ -228,7 +321,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                                                     <Link
                                                         to={subItem.to}
                                                         className={`flex items-center px-4 py-2 text-sm
-                              ${location.pathname.startsWith(subItem.to) ?
+                                                            ${location.pathname.startsWith(subItem.to) ?
                                                                 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
                                                         onClick={onClose}
                                                     >
@@ -244,7 +337,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                                 <Link
                                     to={item.to}
                                     className={`flex items-center px-4 py-2 text-sm
-                    ${location.pathname === item.to ?
+                                        ${location.pathname === item.to ?
                                             'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
                                     onClick={onClose}
                                 >
@@ -263,7 +356,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
         <aside
             ref={sidebarRef}
             className={`bg-white border-r border-gray-200 h-full flex flex-col transition-all duration-300 ease-in-out
-        ${isMobile ? `fixed top-0 left-0 z-30 w-64 h-full ${isOpen ? 'translate-x-0' : '-translate-x-full'}` :
+                ${isMobile ? `fixed top-0 left-0 z-30 w-64 h-full ${isOpen ? 'translate-x-0' : '-translate-x-full'}` :
                     `relative ${collapsed ? 'w-16' : 'w-64'}`}`}
         >
             <div className={`p-4 border-b border-gray-200 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
@@ -313,6 +406,13 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
             </div>
 
             <nav className="flex-1 overflow-y-auto p-3">
+                {!collapsed && (
+                    <div className={`mb-4 overflow-hidden transition-all duration-300 ease-in-out ${collapsed ? 'h-0 opacity-0' : 'h-6 opacity-100'}`}>
+                        <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            {userData?.role === 'admin' ? 'Admin Panel' : 'My Account'}
+                        </div>
+                    </div>
+                )}
                 <ul className="space-y-1">
                     {navItems.map(renderNavItem)}
                 </ul>
@@ -340,7 +440,7 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
                     </div>
 
                     {!collapsed && (
-                        <div className="ml-3 overflow-hidden">
+                        <div className={`ml-3 overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                             <p className="font-medium truncate">
                                 {userData?.firstName || userData?.email || 'User'}
                                 {userData?.lastName && ` ${userData.lastName}`}
