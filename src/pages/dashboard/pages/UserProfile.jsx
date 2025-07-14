@@ -1,39 +1,37 @@
 import { useState } from 'react';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiLock, FiCamera, FiSave, FiUpload } from 'react-icons/fi';
-import { useAuth } from '../../..//context/provider/AuthContext';
-
+import { FiUser, FiMail, FiPhone, FiMapPin, FiLock, FiCamera, FiSave } from 'react-icons/fi';
+import { useAuth } from '../../../context/provider/AuthContext';
 
 const UserProfile = () => {
-
-    const { userData } = useAuth();
-    // const [userData, userData] = useState({
-    //     firstName: 'John',
-    //     lastName: 'Doe',
-    //     email: 'john@example.com',
-    //     phone: '+1 (555) 123-4567',
-    //     address: '123 Main St, New York, NY',
-    //     password: '',
-    //     confirmPassword: ''
-    // });
+    const { userData, updateUser } = useAuth();
+    const [formData, setFormData] = useState({
+        firstName: userData?.firstName || '',
+        lastName: userData?.lastName || '',
+        email: userData?.email || '',
+        phoneNumber: userData?.phoneNumber || '',
+        shippingAddress: userData?.shippingAddress || '',
+        password: '',
+        confirmPassword: ''
+    });
 
     const [errors, setErrors] = useState({});
-    const [avatar, setAvatar] = useState('https://randomuser.me/api/portraits/men/1.jpg');
+    const [avatar, setAvatar] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        userData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
-        if (!userData.firstName) newErrors.firstName = 'First name is required';
-        if (!userData.lastName) newErrors.lastName = 'Last name is required';
-        if (!userData.email.includes('@')) newErrors.email = 'Valid email required';
-        if (userData.password && userData.password !== userData.confirmPassword) {
+        if (!formData.firstName) newErrors.firstName = 'First name is required';
+        if (!formData.lastName) newErrors.lastName = 'Last name is required';
+        if (!formData.email.includes('@')) newErrors.email = 'Valid email required';
+        if (formData.password && formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords must match';
         }
 
@@ -42,13 +40,26 @@ const UserProfile = () => {
             return;
         }
 
-        // Simulate API call
         setIsUploading(true);
-        setTimeout(() => {
-            setIsUploading(false);
+        try {
+            // Prepare data to update (excluding password if empty)
+            const updateData = { ...formData };
+            if (!updateData.password) {
+                delete updateData.password;
+                delete updateData.confirmPassword;
+            }
+
+            // Call your API to update user data
+            await updateUser(updateData);
+
             setIsEditing(false);
             setErrors({});
-        }, 1500);
+        } catch (error) {
+            console.error('Update failed:', error);
+            setErrors({ submit: error.message || 'Failed to update profile' });
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleAvatarChange = (e) => {
@@ -59,6 +70,9 @@ const UserProfile = () => {
             reader.onloadend = () => {
                 setAvatar(reader.result);
                 setIsUploading(false);
+
+                // Here you would typically upload the image to your server
+                // and update the user's profile picture URL
             };
             reader.readAsDataURL(file);
         }
@@ -83,7 +97,19 @@ const UserProfile = () => {
                     ) : (
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setIsEditing(false)}
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setFormData({
+                                        firstName: userData?.firstName || '',
+                                        lastName: userData?.lastName || '',
+                                        email: userData?.email || '',
+                                        phoneNumber: userData?.phoneNumber || '',
+                                        shippingAddress: userData?.shippingAddress || '',
+                                        password: '',
+                                        confirmPassword: ''
+                                    });
+                                    setErrors({});
+                                }}
                                 className="btn btn-ghost rounded-full px-6"
                             >
                                 Cancel
@@ -113,20 +139,21 @@ const UserProfile = () => {
                                 <div className="relative mb-4 group">
                                     <div className="avatar">
                                         <div className="w-40 rounded-xl ring-4 ring-white shadow-lg">
-
-                                            {userData?.profilePicture ? (
+                                            {avatar ? (
+                                                <img src={avatar} alt="Profile" className="object-cover w-full h-full" />
+                                            ) : userData?.profilePicture ? (
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/${userData.profilePicture || 'default.png'}`}
+                                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/${userData.profilePicture}`}
                                                     alt="Profile"
-                                                    className="object-cover"
+                                                    className="object-cover w-full h-full"
                                                     onError={(e) => {
                                                         e.target.onerror = null;
                                                         e.target.src = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/default.png`;
-                                                        e.target.className = 'bg-gray-300';
+                                                        e.target.className = 'bg-gray-300 w-full h-full';
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="bg-blue-500 flex items-center justify-center text-white font-medium">
+                                                <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-4xl font-medium">
                                                     {userData?.firstName?.charAt(0) || userData?.email?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                             )}
@@ -151,10 +178,10 @@ const UserProfile = () => {
 
                                 <div className="text-center lg:text-left mt-4">
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        {userData.firstName} {userData.lastName}
+                                        {formData.firstName} {formData.lastName}
                                     </h2>
-                                    <p className="text-gray-500">{userData.email}</p>
-                                    <div className="badge badge-primary badge-outline mt-2">{userData.role}</div>
+                                    <p className="text-gray-500">{formData.email}</p>
+                                    <div className="badge badge-primary badge-outline mt-2">{userData?.role}</div>
                                 </div>
                             </div>
 
@@ -171,7 +198,7 @@ const UserProfile = () => {
                                             <input
                                                 type="text"
                                                 name="firstName"
-                                                value={userData.firstName}
+                                                value={formData.firstName}
                                                 onChange={handleChange}
                                                 disabled={!isEditing}
                                                 className={`input input-bordered w-full ${errors.firstName ? 'input-error' : ''}`}
@@ -191,7 +218,7 @@ const UserProfile = () => {
                                             <input
                                                 type="text"
                                                 name="lastName"
-                                                value={userData.lastName}
+                                                value={formData.lastName}
                                                 onChange={handleChange}
                                                 disabled={!isEditing}
                                                 className={`input input-bordered w-full ${errors.lastName ? 'input-error' : ''}`}
@@ -212,7 +239,7 @@ const UserProfile = () => {
                                         <input
                                             type="email"
                                             name="email"
-                                            value={userData.email}
+                                            value={formData.email}
                                             onChange={handleChange}
                                             disabled={!isEditing}
                                             className={`input input-bordered w-full ${errors.email ? 'input-error' : ''}`}
@@ -231,8 +258,8 @@ const UserProfile = () => {
                                         </label>
                                         <input
                                             type="tel"
-                                            name="phone"
-                                            value={userData.phoneNumber}
+                                            name="phoneNumber"
+                                            value={formData.phoneNumber}
                                             onChange={handleChange}
                                             disabled={!isEditing}
                                             className="input input-bordered w-full"
@@ -248,8 +275,8 @@ const UserProfile = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            name="address"
-                                            value={userData.shippingAddress}
+                                            name="shippingAddress"
+                                            value={formData.shippingAddress}
                                             onChange={handleChange}
                                             disabled={!isEditing}
                                             className="input input-bordered w-full"
@@ -270,7 +297,7 @@ const UserProfile = () => {
                                                     <input
                                                         type="password"
                                                         name="password"
-                                                        value={userData.password}
+                                                        value={formData.password}
                                                         onChange={handleChange}
                                                         className="input input-bordered w-full"
                                                         placeholder="••••••••"
@@ -286,7 +313,7 @@ const UserProfile = () => {
                                                     <input
                                                         type="password"
                                                         name="confirmPassword"
-                                                        value={userData.confirmPassword}
+                                                        value={formData.confirmPassword}
                                                         onChange={handleChange}
                                                         className={`input input-bordered w-full ${errors.confirmPassword ? 'input-error' : ''}`}
                                                         placeholder="••••••••"
@@ -297,6 +324,11 @@ const UserProfile = () => {
                                                 </div>
                                             </div>
                                         </>
+                                    )}
+                                    {errors.submit && (
+                                        <div className="alert alert-error mt-4">
+                                            <span>{errors.submit}</span>
+                                        </div>
                                     )}
                                 </form>
                             </div>
