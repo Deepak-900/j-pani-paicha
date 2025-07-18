@@ -19,7 +19,9 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
     const location = useLocation();
     const sidebarRef = useRef(null);
 
-    const { userData, logout } = useAuth();
+    const { userData, logout, updateUserData } = useAuth();
+
+    console.log("Updated user data: ", updateUserData)
 
     // Admin navigation items
     const adminNavItems = useMemo(() => [

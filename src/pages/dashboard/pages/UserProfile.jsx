@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiLock, FiCamera, FiSave } from 'react-icons/fi';
 import axios from 'axios';
 import { useAuth } from '../../../context/provider/AuthContext';
+import { toast } from 'react-toastify';
 
 const UserProfile = () => {
-    const { userData } = useAuth();
+    const { userData, updateUserData } = useAuth();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -138,7 +139,7 @@ const UserProfile = () => {
                 formData.shippingAddress !== userData.shippingAddress;
 
             if (profileChanged) {
-                await axios.patch(
+                const response = axios.patch(
                     `${import.meta.env.VITE_API_BASE_URL}/api/user/updateUserData`,
                     {
                         firstName: formData.firstName,
@@ -148,6 +149,16 @@ const UserProfile = () => {
                     },
                     { withCredentials: true }
                 );
+                // Update global auth state with the new data
+                if (response.data && response.data.user) {
+                    await updateUserData(response.data.user);
+                } else {
+                    // If response structure is different, handle accordingly
+                    await updateUserData({
+                        ...userData,
+                        ...formData
+                    });
+                }
             }
 
 
@@ -155,6 +166,7 @@ const UserProfile = () => {
             setIsEditing(false);
             setErrors({});
             setAvatarFile(null);
+            toast.success('Profile updated successfully!');
         } catch (error) {
             console.error('Update failed:', error);
             setErrors({

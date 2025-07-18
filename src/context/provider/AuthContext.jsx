@@ -109,6 +109,35 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Fetch current user data
+    const fetchCurrentUser = async () => {
+        try {
+            const response = await api.get('/api/auth/me');
+            return response.data.user;
+        } catch (err) {
+            console.error('Failed to fetch user data:', err);
+            return null;
+        }
+    };
+    // Update user data in context
+    const updateUserData = async (updatedData = null) => {
+        try {
+            if (updatedData) {
+                // If we're passing updated data directly (optimistic update)
+                setUserData(prev => ({ ...prev, ...updatedData }));
+            } else {
+                // Fetch fresh data from server
+                const user = await fetchCurrentUser();
+                if (user) {
+                    setUserData(user);
+                }
+            }
+            return userData;
+        } catch (err) {
+            console.error('Failed to update user data:', err);
+            throw err;
+        }
+    };
 
     return (
         <AuthContext.Provider value={{
@@ -118,7 +147,8 @@ export const AuthProvider = ({ children }) => {
             error,
             login,
             logout,
-            checkAuthStatus
+            checkAuthStatus,
+            updateUserData
         }}>
             {children}
         </AuthContext.Provider>
