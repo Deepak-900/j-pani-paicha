@@ -25,7 +25,10 @@ export const AuthProvider = ({ children }) => {
 
             if (response.data.isAuthenticated) {
                 setIsLoggedIn(true);
-                setUserData(response.data.user);
+                setUserData({
+                    ...response.data.user,  // Get rememberMe status from the user data returned by backend
+                    rememberMe: response.data.rememberMe || false
+                });
                 setError(null);
                 return true;
             } else {
@@ -54,16 +57,23 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
 
-    const login = async (credentials) => {
+    const login = async ({ email, password, rememberMe = false }) => {
         try {
-            const response = await api.post('/api/auth/login', credentials, {
+            const response = await api.post('/api/auth/login', {
+                email,
+                password,
+                rememberMe
+            }, {
                 withCredentials: true // Ensure cookies are handled
             });
 
             if (response.data.success) {
                 // Immediate state updates before any UI changes
                 setIsLoggedIn(true);
-                setUserData(response.data.user);
+                setUserData({
+                    ...response.data.user,
+                    rememberMe
+                });
                 setError(null);
 
                 // Return both success status and user data

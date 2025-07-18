@@ -94,7 +94,11 @@ const LoginPage = () => {
         }
 
         try {
-            const { success, message } = await login({ email, password });
+            const { success, message } = await login({
+                email,
+                password,
+                rememberMe // This passes the checkbox state to AuthContext 
+            });
 
             if (!success) {
                 setError(message || 'Invalid credentials');
