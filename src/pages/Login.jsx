@@ -12,7 +12,8 @@ import {
     FaApple,
     FaEye,
     FaEyeSlash,
-    FaExclamationCircle
+    FaExclamationCircle,
+    FaCheckCircle
 } from 'react-icons/fa';
 import { HiOutlineMail } from 'react-icons/hi';
 
@@ -29,6 +30,10 @@ const LoginPage = () => {
         password: ''
     });
 
+    // ... (previous state declarations remain the same)
+    const [successMessage, setSuccessMessage] = useState('');
+
+
     // Auth and routing
     const { login, isLoggedIn } = useAuth();
     const navigate = useNavigate();
@@ -37,10 +42,18 @@ const LoginPage = () => {
 
     // Redirect if already logged in
     useEffect(() => {
+
+        if (location.state?.successMessage) {
+            setSuccessMessage(location.state.successMessage);
+            // Clear the state so message doesn't show again on refresh
+            window.history.replaceState({}, document.title);
+        }
+
+
         if (isLoggedIn) {
             navigate(from, { replace: true });
         }
-    }, [isLoggedIn, navigate, from]);
+    }, [location, isLoggedIn, navigate, from]);
 
     const validateForm = () => {
         let valid = true;
@@ -148,6 +161,16 @@ const LoginPage = () => {
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
                             <p className="text-gray-600">Sign in to your account</p>
                         </div>
+
+                        {/* Success Message Display - Placed right before the form */}
+                        {successMessage && (
+                            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center text-green-800">
+                                    <FaCheckCircle className="mr-2 text-3xl text-green-600" />
+                                    <span>{successMessage}</span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Global Error Message */}
                         {error && (

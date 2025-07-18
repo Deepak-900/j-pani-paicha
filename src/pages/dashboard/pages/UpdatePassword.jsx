@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../../context/provider/AuthContext';
-import { FiLock, FiCheck, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
+import { FiLock, FiCheck, FiAlertCircle, FiArrowRight, FiX } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+
 
 const UpdatePassword = () => {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -10,7 +12,16 @@ const UpdatePassword = () => {
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-    const { userData } = useAuth();
+
+    const { logout } = useAuth(); // Added logout function
+    const navigate = useNavigate();
+
+    // Validate form whenever inputs change
+    useEffect(() => {
+        if (newPassword || confirmPassword || currentPassword) {
+            validateForm();
+        }
+    }, [newPassword, confirmPassword, currentPassword]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -23,6 +34,11 @@ const UpdatePassword = () => {
 
         if (newPassword !== confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
+        }
+
+        // Check if new password is same as current password
+        if (showCurrentPassword && currentPassword && newPassword === currentPassword) {
+            newErrors.newPassword = 'New password must be different from current password';
         }
 
         setErrors(newErrors);
@@ -40,27 +56,48 @@ const UpdatePassword = () => {
         }
 
         try {
-            const response = await axios.patch('/api/user/updatePassword', {
-                currentPassword,
-                newPassword
-            }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            const response = await axios.patch(
+                '/api/user/updatePassword',
+                { currentPassword, newPassword },
+                { withCredentials: true } // Important for cookie-based auth
+            );
 
             if (response.data.success) {
                 setSuccess(true);
+                // Clear form
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
                 setShowCurrentPassword(false);
+
+                setTimeout(async () => {
+                    await logout();
+                    navigate('/login', {
+                        state: {
+                            successMessage: 'Password changed successfully. Please login again with your new password.'
+                        }
+                    });
+                }, 2000);
             }
         } catch (error) {
-            if (error.response && error.response.data.message) {
-                setErrors({ currentPassword: error.response.data.message });
+            if (error.response) {
+                if (error.response.status === 401) {
+                    setErrors({ currentPassword: 'Current password is incorrect' });
+                } else if (error.response.data.message) {
+                    setErrors({ general: error.response.data.message });
+                }
             } else {
                 setErrors({ general: 'An error occurred. Please try again.' });
             }
         }
+    };
+
+    const resetForm = () => {
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setErrors({});
+        setShowCurrentPassword(false);
     };
 
     return (
@@ -74,7 +111,7 @@ const UpdatePassword = () => {
                     <div className="alert alert-success shadow-lg">
                         <div>
                             <FiCheck className="text-xl" />
-                            <span>Password updated successfully!</span>
+                            <span>Password updated successfully! You'll be logged out shortly for security reasons.</span>
                         </div>
                     </div>
                 ) : (
@@ -170,9 +207,19 @@ const UpdatePassword = () => {
                         )}
 
                         <div className="card-actions justify-end mt-6">
+                            {showCurrentPassword && (
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="btn btn-ghost mr-2"
+                                >
+                                    <FiX className="mr-1" /> Cancel
+                                </button>
+                            )}
                             <button
                                 type="submit"
                                 className="btn btn-primary"
+                                disabled={Object.keys(errors).length > 0}
                             >
                                 {showCurrentPassword ? (
                                     <>

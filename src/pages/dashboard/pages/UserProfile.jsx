@@ -193,8 +193,6 @@ const UserProfile = () => {
             email: userData.email,
             phoneNumber: userData.phoneNumber,
             shippingAddress: userData.shippingAddress,
-            password: '',
-            confirmPassword: ''
         });
 
         // Clean up the temporary blob URL if it exists
@@ -414,46 +412,6 @@ const UserProfile = () => {
                                         />
                                     </div>
 
-                                    {isEditing && (
-                                        <>
-                                            <div className="divider">Change Password</div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                                <div className="form-control">
-                                                    <label className="label">
-                                                        <span className="label-text text-gray-600 font-medium flex items-center gap-2">
-                                                            <FiLock /> New Password
-                                                        </span>
-                                                    </label>
-                                                    <input
-                                                        type="password"
-                                                        name="password"
-                                                        value={formData.password}
-                                                        onChange={handleChange}
-                                                        className="input input-bordered w-full"
-                                                        placeholder="Enter new password"
-                                                    />
-                                                </div>
-                                                <div className="form-control">
-                                                    <label className="label">
-                                                        <span className="label-text text-gray-600 font-medium flex items-center gap-2">
-                                                            <FiLock /> Confirm Password
-                                                        </span>
-                                                    </label>
-                                                    <input
-                                                        type="password"
-                                                        name="confirmPassword"
-                                                        value={formData.confirmPassword}
-                                                        onChange={handleChange}
-                                                        className={`input input-bordered w-full ${errors.confirmPassword ? 'input-error' : ''}`}
-                                                        placeholder="Confirm new password"
-                                                    />
-                                                    {errors.confirmPassword && (
-                                                        <span className="text-error text-sm mt-1">{errors.confirmPassword}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
                                 </form>
                             </div>
                         </div>
