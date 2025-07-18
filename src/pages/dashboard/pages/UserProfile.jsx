@@ -1,33 +1,104 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiUser, FiMail, FiPhone, FiMapPin, FiLock, FiCamera, FiSave } from 'react-icons/fi';
+import axios from 'axios';
 import { useAuth } from '../../../context/provider/AuthContext';
 
 const UserProfile = () => {
-    const { userData, updateUser } = useAuth();
+    const { userData } = useAuth();
     const [formData, setFormData] = useState({
-        firstName: userData?.firstName || '',
-        lastName: userData?.lastName || '',
-        email: userData?.email || '',
-        phoneNumber: userData?.phoneNumber || '',
-        shippingAddress: userData?.shippingAddress || '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        shippingAddress: '',
         password: '',
         confirmPassword: ''
     });
 
     const [errors, setErrors] = useState({});
     const [avatar, setAvatar] = useState(null);
+    const [avatarFile, setAvatarFile] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Initialize form with user data
+    useEffect(() => {
+        if (userData) {
+            setFormData({
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || '',
+                email: userData.email || '',
+                phoneNumber: userData.phoneNumber || '',
+                shippingAddress: userData.shippingAddress || '',
+                password: '',
+                confirmPassword: ''
+            });
+            setAvatar(
+                userData.profilePicture
+                    ? `${import.meta.env.VITE_API_BASE_URL}/userProfile/${userData.profilePicture}`
+                    : null
+            );
+        }
+    }, [userData]);
+
+    // Track changes
+    useEffect(() => {
+        if (!userData) return;
+
+        const profileChanged =
+            formData.firstName !== userData.firstName ||
+            formData.lastName !== userData.lastName ||
+            formData.email !== userData.email ||
+            formData.phoneNumber !== userData.phoneNumber ||
+            formData.shippingAddress !== userData.shippingAddress;
+
+        const passwordChanged = formData.password || formData.confirmPassword;
+        const avatarChanged = avatarFile !== null;
+
+        setHasChanges(profileChanged || passwordChanged || avatarChanged);
+    }, [formData, userData, avatarFile]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // // debug line:
+        // console.log("Selected file:", file.name, file.type, file.size + " bytes");
+
+        // setAvatarFile(file); // Make sure this state is actually set
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            setErrors({ submit: 'Only image files are allowed' });
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            setErrors({ submit: 'File size must be less than 5MB' });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatar(reader.result);
+            setAvatarFile(file);
+            setErrors({}); // Clear previous errors
+        };
+        reader.readAsDataURL(file);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
+        // Validation
         if (!formData.firstName) newErrors.firstName = 'First name is required';
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
         if (!formData.email.includes('@')) newErrors.email = 'Valid email required';
@@ -41,40 +112,56 @@ const UserProfile = () => {
         }
 
         setIsUploading(true);
+
         try {
-            // Prepare data to update (excluding password if empty)
-            const updateData = { ...formData };
-            if (!updateData.password) {
-                delete updateData.password;
-                delete updateData.confirmPassword;
+            // 1. Handle avatar upload separately
+            if (avatarFile) {
+                const avatarFormData = new FormData();
+                avatarFormData.append('avatar', avatarFile);
+
+                await axios.patch(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/user/updateUserAvatar`, // Different endpoint
+                    avatarFormData,
+                    {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        withCredentials: true
+                    }
+                );
             }
 
-            // Call your API to update user data
-            await updateUser(updateData);
+            // 2. Handle profile data update
+            const profileChanged =
+                formData.firstName !== userData.firstName ||
+                formData.lastName !== userData.lastName ||
+                formData.email !== userData.email ||
+                formData.phoneNumber !== userData.phoneNumber ||
+                formData.shippingAddress !== userData.shippingAddress;
 
+            if (profileChanged) {
+                await axios.patch(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/user/updateUserData`,
+                    {
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        email: formData.email,
+                        phoneNumber: formData.phoneNumber
+                    },
+                    { withCredentials: true }
+                );
+            }
+
+
+            // Refresh user data
             setIsEditing(false);
             setErrors({});
+            setAvatarFile(null);
         } catch (error) {
             console.error('Update failed:', error);
-            setErrors({ submit: error.message || 'Failed to update profile' });
+            setErrors({
+                submit: error.response?.data?.message || 'Failed to update profile'
+            });
         } finally {
             setIsUploading(false);
-        }
-    };
-
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setIsUploading(true);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result);
-                setIsUploading(false);
-
-                // Here you would typically upload the image to your server
-                // and update the user's profile picture URL
-            };
-            reader.readAsDataURL(file);
         }
     };
 
@@ -100,14 +187,20 @@ const UserProfile = () => {
                                 onClick={() => {
                                     setIsEditing(false);
                                     setFormData({
-                                        firstName: userData?.firstName || '',
-                                        lastName: userData?.lastName || '',
-                                        email: userData?.email || '',
-                                        phoneNumber: userData?.phoneNumber || '',
-                                        shippingAddress: userData?.shippingAddress || '',
+                                        firstName: userData.firstName,
+                                        lastName: userData.lastName,
+                                        email: userData.email,
+                                        phoneNumber: userData.phoneNumber,
+                                        shippingAddress: userData.shippingAddress,
                                         password: '',
                                         confirmPassword: ''
                                     });
+                                    setAvatar(
+                                        userData.profilePicture
+                                            ? `${import.meta.env.VITE_API_BASE_URL}/userProfile/${userData.profilePicture}`
+                                            : null
+                                    );
+                                    setAvatarFile(null);
                                     setErrors({});
                                 }}
                                 className="btn btn-ghost rounded-full px-6"
@@ -117,7 +210,7 @@ const UserProfile = () => {
                             <button
                                 onClick={handleSubmit}
                                 className="btn btn-primary rounded-full px-6 gap-2 shadow-lg hover:shadow-xl transition-all"
-                                disabled={isUploading}
+                                disabled={isUploading || !hasChanges}
                             >
                                 {isUploading ? (
                                     <span className="loading loading-spinner"></span>
@@ -140,21 +233,14 @@ const UserProfile = () => {
                                     <div className="avatar">
                                         <div className="w-40 rounded-xl ring-4 ring-white shadow-lg">
                                             {avatar ? (
-                                                <img src={avatar} alt="Profile" className="object-cover w-full h-full" />
-                                            ) : userData?.profilePicture ? (
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/${userData.profilePicture}`}
+                                                    src={avatar}
                                                     alt="Profile"
                                                     className="object-cover w-full h-full"
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/userProfile/default.png`;
-                                                        e.target.className = 'bg-gray-300 w-full h-full';
-                                                    }}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-4xl font-medium">
-                                                    {userData?.firstName?.charAt(0) || userData?.email?.charAt(0).toUpperCase() || 'U'}
+                                                    {userData?.firstName?.charAt(0)?.toUpperCase() || 'U'}
                                                 </div>
                                             )}
                                         </div>
@@ -181,13 +267,20 @@ const UserProfile = () => {
                                         {formData.firstName} {formData.lastName}
                                     </h2>
                                     <p className="text-gray-500">{formData.email}</p>
-                                    <div className="badge badge-primary badge-outline mt-2">{userData?.role}</div>
+                                    <div className="badge badge-primary badge-outline mt-2">
+                                        {userData?.role}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Form Section */}
                             <div className="flex-1">
                                 <form className="space-y-5">
+                                    {errors.submit && (
+                                        <div className="alert alert-error mt-4">
+                                            <span>{errors.submit}</span>
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div className="form-control">
                                             <label className="label">
@@ -284,52 +377,7 @@ const UserProfile = () => {
                                         />
                                     </div>
 
-                                    {isEditing && (
-                                        <>
-                                            <div className="divider text-gray-400">Password Settings</div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                                <div className="form-control">
-                                                    <label className="label">
-                                                        <span className="label-text text-gray-600 font-medium flex items-center gap-2">
-                                                            <FiLock /> New Password
-                                                        </span>
-                                                    </label>
-                                                    <input
-                                                        type="password"
-                                                        name="password"
-                                                        value={formData.password}
-                                                        onChange={handleChange}
-                                                        className="input input-bordered w-full"
-                                                        placeholder="••••••••"
-                                                    />
-                                                </div>
 
-                                                <div className="form-control">
-                                                    <label className="label">
-                                                        <span className="label-text text-gray-600 font-medium flex items-center gap-2">
-                                                            <FiLock /> Confirm Password
-                                                        </span>
-                                                    </label>
-                                                    <input
-                                                        type="password"
-                                                        name="confirmPassword"
-                                                        value={formData.confirmPassword}
-                                                        onChange={handleChange}
-                                                        className={`input input-bordered w-full ${errors.confirmPassword ? 'input-error' : ''}`}
-                                                        placeholder="••••••••"
-                                                    />
-                                                    {errors.confirmPassword && (
-                                                        <span className="text-error text-sm mt-1">{errors.confirmPassword}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                    {errors.submit && (
-                                        <div className="alert alert-error mt-4">
-                                            <span>{errors.submit}</span>
-                                        </div>
-                                    )}
                                 </form>
                             </div>
                         </div>
