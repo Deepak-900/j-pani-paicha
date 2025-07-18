@@ -14,6 +14,7 @@ import DashboardLayout from '../pages/dashboard/DashboardLayout'
 import DashboardHome from '../pages/dashboard/pages/DashboardHome'
 import ProtectedRoute from '../components/ProtectedRoute'
 import UserProfile from '../pages/dashboard/pages/UserProfile'
+import UpdatePassword from '../pages/dashboard/pages/UpdatePassword'
 
 const Router = () => {
     return (
@@ -34,6 +35,7 @@ const Router = () => {
                     <Route element={<DashboardLayout />} >
                         <Route path='dashboard' element={<DashboardHome />} />
                         <Route path='userProfile' element={<UserProfile />} />
+                        <Route path='updatePassword' element={<UpdatePassword />} />
                     </Route>
                 </Route>
             </Routes>

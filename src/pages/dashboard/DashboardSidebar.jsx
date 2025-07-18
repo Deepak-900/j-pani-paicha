@@ -4,7 +4,8 @@ import {
     FiHome, FiPackage, FiShoppingCart, FiUsers,
     FiSettings, FiChevronDown, FiChevronUp,
     FiX, FiChevronLeft, FiChevronRight, FiLogOut,
-    FiUser, FiHeart, FiCreditCard, FiMapPin
+    FiUser, FiHeart, FiCreditCard, FiMapPin,
+    FiKey
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import Logo from '../../assets/logo.png';
@@ -69,7 +70,6 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
             to: "/dashboard/settings",
             icon: FiSettings,
             label: "Settings",
-
         }
     ], []);
 
@@ -108,6 +108,12 @@ const DashboardSidebar = ({ isOpen, onClose, isMobile }) => {
             to: "/userProfile",
             icon: FiUser,
             label: "My Account",
+        },
+        {
+            id: 'Update Password',
+            to: "/updatePassword",
+            icon: FiKey,
+            label: "Update Password",
         },
         {
             id: 'signout',
